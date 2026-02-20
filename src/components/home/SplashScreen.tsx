@@ -95,7 +95,7 @@ export default function SplashScreen({ onComplete }: { onComplete: () => void })
                   animate={{ opacity: 0.5 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.5, delay: 0.15 }}
-                  className="text-white text-[10px] tracking-[0.3em] uppercase font-medium"
+                  className="text-white text-[15px] tracking-[0.2em] uppercase font-medium"
                 >
                   Business Agency
                 </motion.p>

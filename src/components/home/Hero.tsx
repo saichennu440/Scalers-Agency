@@ -264,8 +264,8 @@ function ParticleCanvas() {
   return (
     <canvas
       ref={canvasRef}
-      className="absolute inset-0 w-full h-full block cursor-crosshair"
-      title="Hover to scatter · Click to burst"
+      className="absolute inset-0 w-full h-full block cursor-auto"
+      // title="Hover to scatter · Click to burst"
     />
   );
 }
@@ -324,8 +324,8 @@ export default function HeroSection({ onNavigate }: HeroProps) {
         transition={{ delay: 1.5, duration: 1 }}
         className="absolute top-28 left-6 z-10 hidden md:flex items-center gap-2 text-white/20 text-[9px] tracking-[0.3em] uppercase pointer-events-none"
       >
-        <span className="w-1.5 h-1.5 rounded-full bg-[#D91E36] animate-pulse" />
-        Hover to scatter · Click to burst
+        {/* <span className="w-1.5 h-1.5 rounded-full bg-[#D91E36] animate-pulse" />
+        Hover to scatter · Click to burst */}
       </motion.div>
 
       {/* Top-right word indicator */}

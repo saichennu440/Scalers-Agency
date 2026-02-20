@@ -8,6 +8,7 @@ import CTA from '../components/home/CTA';
 import { Page } from '../lib/types';
 import React, { useState } from 'react';
 import SplashScreen from '../components/home/SplashScreen';
+import ClientsMarquee from '../components/home/ClientsMarquee';
 interface HomePageProps {
   onNavigate: (page: Page) => void;
 }
@@ -20,6 +21,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
             {showSplash && <SplashScreen onComplete={() => setShowSplash(false)} />}
       <Hero  />
       <Whoweare />
+      <ClientsMarquee />
       <Services onNavigate={onNavigate} />
       <About onNavigate={onNavigate} />
       <Stats />

@@ -6,22 +6,23 @@ import { ArrowRight, Plus, Minus } from 'lucide-react';
 const SERVICES = [
   {
     id: '1',
-    title: 'Brand Strategy & Identity',
+    title: 'Branding & Identity',
     description:
       'We craft brand identities that go far beyond logos — building a complete visual language, tone of voice, and positioning framework that resonates with your audience and stands apart in the market.',
   },
-  {
+    {
     id: '2',
-    title: 'Performance Marketing',
-    description:
-      'Data-driven paid campaigns across Google, Meta, and LinkedIn, engineered to maximise ROI. From targeting and creative to landing pages and attribution, every variable is optimised for growth.',
-  },
-  {
-    id: '3',
     title: 'Content Creation & SEO',
     description:
       'Long-term organic growth through strategic content, technical SEO audits, authority link-building, and editorial calendars that position your brand as an industry leader.',
   },
+  {
+    id: '3',
+    title: 'Website Design, Development & CRO',
+    description:
+      'Data-driven paid campaigns across Google, Meta, and LinkedIn, engineered to maximise ROI. From targeting and creative to landing pages and attribution, every variable is optimised for growth.',
+  },
+
   {
     id: '4',
     title: 'Social Media Management',
@@ -30,13 +31,25 @@ const SERVICES = [
   },
   {
     id: '5',
-    title: 'Lead Generation & Funnels',
+    title: 'Digital Marketing',
     description:
       'End-to-end funnel architecture — from awareness campaigns to nurture sequences and CRM pipelines — designed to capture, qualify, and convert high-intent prospects at scale.',
   },
   {
     id: '6',
-    title: 'Marketing Automation',
+    title: 'Brand / Product Launches',
+    description:
+      'We design and implement automated workflows, email sequences, and CRM integrations that save your team hours each week while delivering personalised experiences to every prospect.',
+  },
+    {
+    id: '7',
+    title: 'Influencer Marketing',
+    description:
+      'We design and implement automated workflows, email sequences, and CRM integrations that save your team hours each week while delivering personalised experiences to every prospect.',
+  },
+    {
+    id: '8',
+    title: 'Add Shoot',
     description:
       'We design and implement automated workflows, email sequences, and CRM integrations that save your team hours each week while delivering personalised experiences to every prospect.',
   },
@@ -321,10 +334,10 @@ export default function ServicesPage({ onNavigate }: ServicesPageProps) {
             {/* Feature grid */}
             <div className="grid grid-cols-2 gap-4">
               {[
-                { icon: '🎯', title: 'Goal-First', desc: 'Every tactic ties back to a concrete business objective.' },
-                { icon: '📊', title: 'Data-Led',   desc: 'Decisions driven by performance data, not guesswork.' },
-                { icon: '⚡', title: 'Fast & Lean', desc: 'No bloat. Dedicated teams that move quickly and efficiently.' },
-                { icon: '🔍', title: 'Transparent', desc: 'Full reporting access — no smoke, no mirrors, no surprises.' },
+                {  title: 'Goal-First', desc: 'Every tactic ties back to a concrete business objective.' },
+                {  title: 'Data-Led',   desc: 'Decisions driven by performance data, not guesswork.' },
+                {  title: 'Fast & Lean', desc: 'No bloat. Dedicated teams that move quickly and efficiently.' },
+                {  title: 'Transparent', desc: 'Full reporting access — no smoke, no mirrors, no surprises.' },
               ].map((f, i) => (
                 <motion.div
                   key={i}
@@ -334,7 +347,7 @@ export default function ServicesPage({ onNavigate }: ServicesPageProps) {
                   viewport={{ once: true }}
                   className="bg-white/60 border border-[#D91E36]/8 rounded-2xl p-6 hover:bg-white hover:shadow-md transition-all duration-300 group"
                 >
-                  <span className="text-2xl block mb-3">{f.icon}</span>
+                  {/* <span className="text-2xl block mb-3">{f.icon}</span> */}
                   <h4 className="font-serif text-[#8B1E32] text-lg mb-1 group-hover:text-[#D91E36] transition-colors">{f.title}</h4>
                   <p className="text-[#8B1E32]/55 text-sm leading-relaxed">{f.desc}</p>
                 </motion.div>

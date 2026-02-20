@@ -12,7 +12,7 @@ const navLinks: { label: string; page: Page }[] = [
   { label: 'About', page: 'about' },
   { label: 'Services', page: 'services' },
   { label: 'Clients', page: 'clients' },
-  { label: 'Contact', page: 'contact' },
+  // { label: 'Contact', page: 'contact' },
 ];
 
 export default function Header({ currentPage, onNavigate }: HeaderProps) {

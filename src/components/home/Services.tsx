@@ -6,7 +6,7 @@ export default function ServicesSection() {
     const services = [
         {
             number: '01',
-            title: 'Influencer Marketing',
+            title: 'Branding',
             description: 'Describe the service and how customers or clients can benefit from it. This is the place to add a short description with relevant details, like pricing, duration and how to book.',
         },
         {
@@ -16,17 +16,17 @@ export default function ServicesSection() {
         },
         {
             number: '03',
-            title: 'Email Campaigns & Strategy',
+            title: 'Website Design & Development',
             description: 'Describe the service and how customers or clients can benefit from it. This is the place to add a short description with relevant details, like pricing, duration and how to book.',
         },
         {
             number: '04',
-            title: 'Social Media Campaigns',
+            title: 'Social Media Management',
             description: 'Describe the service and how customers or clients can benefit from it. This is the place to add a short description with relevant details, like pricing, duration and how to book.',
         },
         {
             number: '05',
-            title: 'Website Design & Development',
+            title: 'Digital Marketing',
             description: 'Describe the service and how customers or clients can benefit from it. This is the place to add a short description with relevant details, like pricing, duration and how to book.',
         },
     ];
