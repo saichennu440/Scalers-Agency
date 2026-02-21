@@ -43,8 +43,14 @@ function VideoThumbnail({ url }: { url: string }) {
 }
 
 export default function ClientCard({ content, onClick, index = 0 }: ClientCardProps) {
-  const isVideo = content.content_type === 'video';
-  const isImage = content.content_type === 'image';
+ const isVideo =
+  content.content_type === 'video' ||
+  content.content_type === 'videos' ||
+  content.content_type === 'reels';
+
+const isImage =
+  content.content_type === 'image' ||
+  content.content_type === 'creatives';
   const isText  = content.content_type === 'text';
 
   return (

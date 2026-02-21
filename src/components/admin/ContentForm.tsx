@@ -1,7 +1,19 @@
 import { useState, useRef } from 'react';
 import { supabase } from '../../lib/supabase';
-import { ClientContent, ContentType } from '../../lib/types';
-import { Save, X, Upload, Link, Loader2, Image as ImageIcon, Film } from 'lucide-react';
+import { ClientContent } from '../../lib/types';
+import { Save, X, Upload, Link, Loader2, Image as ImageIcon, Film, CheckCircle2 } from 'lucide-react';
+
+// ── New content types ──────────────────────────────────────────────
+// reels    → short vertical video
+// videos   → longer / landscape video
+// creatives → image / graphic / poster
+type ContentType = 'reels' | 'videos' | 'creatives';
+
+const CONTENT_TYPE_CONFIG: Record<ContentType, { label: string; mediaKind: 'video' | 'image'; accept: string; hint: string }> = {
+  reels:     { label: 'Reels',     mediaKind: 'video', accept: 'video/*',  hint: 'MP4, WebM, MOV — max 200MB' },
+  videos:    { label: 'Videos',    mediaKind: 'video', accept: 'video/*',  hint: 'MP4, WebM, MOV — max 200MB' },
+  creatives: { label: 'Creatives', mediaKind: 'image', accept: 'image/*',  hint: 'JPG, PNG, GIF, WebP — max 50MB' },
+};
 
 interface ContentFormProps {
   initial?: Partial<ClientContent>;
@@ -12,7 +24,7 @@ interface ContentFormProps {
 const emptyForm = {
   title: '',
   description: '',
-  content_type: 'image' as ContentType,
+  content_type: 'creatives' as ContentType,
   content_url: '',
   content_text: '',
   client_name: '',
@@ -25,80 +37,88 @@ const emptyForm = {
 type InputMode = 'upload' | 'url';
 
 export default function ContentForm({ initial, onSuccess, onCancel }: ContentFormProps) {
-  const [form, setForm] = useState({ ...emptyForm, ...initial });
+  const [form, setForm] = useState({ ...emptyForm, ...(initial as any) });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-  const [inputMode, setInputMode] = useState<InputMode>(initial?.content_url ? 'url' : 'upload');
-  const [uploading, setUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [previewUrl, setPreviewUrl] = useState<string>(initial?.content_url || '');
+
+  // ── Main media ──
+  const [inputMode,       setInputMode]       = useState<InputMode>(initial?.content_url ? 'url' : 'upload');
+  const [uploading,       setUploading]       = useState(false);
+  const [uploadedFileName, setUploadedFileName] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // ── Client logo ──
+  const [logoMode,        setLogoMode]        = useState<InputMode>(initial?.client_logo_url ? 'url' : 'upload');
+  const [logoUploading,   setLogoUploading]   = useState(false);
+  const [logoFileName,    setLogoFileName]    = useState('');
+  const [logoPreview,     setLogoPreview]     = useState<string>(initial?.client_logo_url || '');
+  const logoInputRef = useRef<HTMLInputElement>(null);
+
+  // ── URL preview for URL-mode video (not used for uploads — see note below) ──
+  const [urlPreview, setUrlPreview] = useState<string>(
+    initial?.content_url && !['reels','videos'].includes(initial?.content_type ?? '') ? initial.content_url : ''
+  );
+
+  const typeConfig = CONTENT_TYPE_CONFIG[form.content_type as ContentType] ?? CONTENT_TYPE_CONFIG.creatives;
+
+  /* ── Field change ── */
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
-    setForm((prev) => ({
+    if (name === 'content_type') {
+      setForm((prev: any) => ({ ...prev, content_type: value as ContentType, content_url: '' }));
+      setUploadedFileName('');
+      setUrlPreview('');
+      return;
+    }
+    setForm((prev: any) => ({
       ...prev,
       [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
     }));
-    // Clear content_url when type changes
-    if (name === 'content_type') {
-      setForm((prev) => ({ ...prev, content_type: value as ContentType, content_url: '' }));
-      setPreviewUrl('');
-    }
   };
 
+  /* ── Upload main media ── */
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
-    const isImage = file.type.startsWith('image/');
+    const cfg = CONTENT_TYPE_CONFIG[form.content_type as ContentType];
     const isVideo = file.type.startsWith('video/');
-    if (form.content_type === 'image' && !isImage) {
-      setError('Please select an image file (JPG, PNG, GIF, WebP, etc.)');
+    const isImage = file.type.startsWith('image/');
+
+    if (cfg.mediaKind === 'video' && !isVideo) {
+      setError('Please select a video file (MP4, WebM, MOV)');
       return;
     }
-    if (form.content_type === 'video' && !isVideo) {
-      setError('Please select a video file (MP4, WebM, MOV, etc.)');
+    if (cfg.mediaKind === 'image' && !isImage) {
+      setError('Please select an image file (JPG, PNG, GIF, WebP)');
       return;
     }
 
-    // Validate file size (50MB max)
-    const maxSize = 50 * 1024 * 1024;
+    const maxSize = cfg.mediaKind === 'video' ? 200 * 1024 * 1024 : 50 * 1024 * 1024;
     if (file.size > maxSize) {
-      setError('File size must be under 50MB');
+      setError(`File must be under ${cfg.mediaKind === 'video' ? '200' : '50'}MB`);
       return;
     }
 
     setError('');
     setUploading(true);
-    setUploadProgress(0);
+    setUploadedFileName('');
 
     try {
-      // Create unique filename
       const ext = file.name.split('.').pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${ext}`;
-      const filePath = `${form.content_type}s/${fileName}`;
+      const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+      const folder = form.content_type; // reels / videos / creatives
+      const filePath = `${folder}/${fileName}`;
 
-      // Upload to Supabase Storage
       const { error: uploadError } = await supabase.storage
-        .from('client-content')
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: false,
-        });
+        .from('client_content')
+        .upload(filePath, file, { cacheControl: '3600', upsert: false });
 
       if (uploadError) throw uploadError;
 
-      // Get public URL
-      const { data: urlData } = supabase.storage
-        .from('client-content')
-        .getPublicUrl(filePath);
-
-      const publicUrl = urlData.publicUrl;
-      setForm((prev) => ({ ...prev, content_url: publicUrl }));
-      setPreviewUrl(publicUrl);
-      setUploadProgress(100);
+      const { data: urlData } = supabase.storage.from('client_content').getPublicUrl(filePath);
+      setForm((prev: any) => ({ ...prev, content_url: urlData.publicUrl }));
+      setUploadedFileName(file.name);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Upload failed. Please try again.');
     } finally {
@@ -106,22 +126,59 @@ export default function ContentForm({ initial, onSuccess, onCancel }: ContentFor
     }
   };
 
-  const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const url = e.target.value;
-    setForm((prev) => ({ ...prev, content_url: url }));
-    setPreviewUrl(url);
+  /* ── Upload logo ── */
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setError('Logo must be an image file');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setError('Logo must be under 5MB');
+      return;
+    }
+
+    setError('');
+    setLogoUploading(true);
+    setLogoFileName('');
+
+    try {
+      const ext = file.name.split('.').pop();
+      const fileName = `logos/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('client_content')
+        .upload(fileName, file, { cacheControl: '3600', upsert: false });
+
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage.from('client_content').getPublicUrl(fileName);
+      setForm((prev: any) => ({ ...prev, client_logo_url: urlData.publicUrl }));
+      setLogoFileName(file.name);
+      setLogoPreview(urlData.publicUrl);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Logo upload failed. Please try again.');
+    } finally {
+      setLogoUploading(false);
+    }
   };
 
+  /* ── URL mode for main media ── */
+  const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const url = e.target.value;
+    setForm((prev: any) => ({ ...prev, content_url: url }));
+    setUrlPreview(url);
+  };
+
+  /* ── Submit ── */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     if (!form.title.trim()) { setError('Title is required'); return; }
-    if ((form.content_type === 'image' || form.content_type === 'video') && !form.content_url.trim()) {
-      setError(`Please upload a file or enter a ${form.content_type} URL`);
-      return;
-    }
-    if (form.content_type === 'text' && !form.content_text.trim()) {
-      setError('Text content is required for text type');
+    if (!form.content_url.trim()) {
+      setError('Please upload a file or enter a URL');
       return;
     }
 
@@ -140,8 +197,8 @@ export default function ContentForm({ initial, onSuccess, onCancel }: ContentFor
         display_order: Number(form.display_order),
       };
 
-      if (initial?.id) {
-        const { error: err } = await supabase.from('client_content').update(payload).eq('id', initial.id);
+      if ((initial as any)?.id) {
+        const { error: err } = await supabase.from('client_content').update(payload).eq('id', (initial as any).id);
         if (err) throw err;
       } else {
         const { error: err } = await supabase.from('client_content').insert(payload);
@@ -158,13 +215,17 @@ export default function ContentForm({ initial, onSuccess, onCancel }: ContentFor
   const fieldClass = 'w-full px-4 py-3 border border-gray-200 rounded-sm text-sm focus:outline-none focus:border-[#C8102E] transition-colors duration-200 bg-white';
   const labelClass = 'block text-xs font-semibold text-gray-600 tracking-wide uppercase mb-1.5';
 
-  const showMediaInput = form.content_type === 'image' || form.content_type === 'video';
+  /* ── Derived booleans ── */
+  const isVideo     = typeConfig.mediaKind === 'video';
+  const isImage     = typeConfig.mediaKind === 'image';
+  const hasUpload   = !!uploadedFileName;  // successfully uploaded file
+  const hasUrl      = !!form.content_url && !hasUpload; // URL-only mode
 
   return (
     <form onSubmit={handleSubmit} className="bg-white rounded-sm border border-gray-200 p-6">
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-lg font-black text-gray-900">
-          {initial?.id ? 'Edit Content' : 'Add New Content'}
+          {(initial as any)?.id ? 'Edit Content' : 'Add New Content'}
         </h3>
         <button type="button" onClick={onCancel} className="text-gray-400 hover:text-gray-600">
           <X size={20} />
@@ -172,12 +233,11 @@ export default function ContentForm({ initial, onSuccess, onCancel }: ContentFor
       </div>
 
       {error && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-sm">
-          {error}
-        </div>
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-sm">{error}</div>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+
         {/* Title */}
         <div className="md:col-span-2">
           <label className={labelClass}>Title *</label>
@@ -188,9 +248,9 @@ export default function ContentForm({ initial, onSuccess, onCancel }: ContentFor
         <div>
           <label className={labelClass}>Content Type *</label>
           <select name="content_type" value={form.content_type} onChange={handleChange} className={fieldClass}>
-            <option value="image">Image</option>
-            <option value="video">Video</option>
-            <option value="text">Text</option>
+            <option value="reels">Reels (short vertical video)</option>
+            <option value="videos">Videos (longer / landscape)</option>
+            <option value="creatives">Creatives (image / poster)</option>
           </select>
         </div>
 
@@ -200,155 +260,123 @@ export default function ContentForm({ initial, onSuccess, onCancel }: ContentFor
           <input name="category" value={form.category} onChange={handleChange} className={fieldClass} placeholder="e.g. Branding, Marketing" />
         </div>
 
-        {/* Image / Video Input */}
-        {showMediaInput && (
-          <div className="md:col-span-2">
-            <label className={labelClass}>
-              {form.content_type === 'image' ? 'Image' : 'Video'} *
-            </label>
+        {/* ── Media upload / URL ── */}
+        <div className="md:col-span-2">
+          <label className={labelClass}>
+            {typeConfig.label} File *
+          </label>
 
-            {/* Toggle: Upload vs URL */}
-            <div className="flex rounded-sm border border-gray-200 overflow-hidden mb-3 w-fit">
-              <button
-                type="button"
-                onClick={() => { setInputMode('upload'); }}
-                className={`flex items-center gap-1.5 px-4 py-2 text-xs font-semibold transition-colors ${
-                  inputMode === 'upload' ? 'bg-[#C8102E] text-white' : 'text-gray-600 hover:bg-gray-50'
+          {/* Toggle */}
+          <div className="flex rounded-sm border border-gray-200 overflow-hidden mb-3 w-fit">
+            <button
+              type="button"
+              onClick={() => { setInputMode('upload'); setUrlPreview(''); }}
+              className={`flex items-center gap-1.5 px-4 py-2 text-xs font-semibold transition-colors ${inputMode === 'upload' ? 'bg-[#C8102E] text-white' : 'text-gray-600 hover:bg-gray-50'}`}
+            >
+              <Upload size={12} /> Upload from Device
+            </button>
+            <button
+              type="button"
+              onClick={() => { setInputMode('url'); setUploadedFileName(''); }}
+              className={`flex items-center gap-1.5 px-4 py-2 text-xs font-semibold transition-colors ${inputMode === 'url' ? 'bg-[#C8102E] text-white' : 'text-gray-600 hover:bg-gray-50'}`}
+            >
+              <Link size={12} /> Enter URL
+            </button>
+          </div>
+
+          {/* Upload dropzone */}
+          {inputMode === 'upload' && (
+            <>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept={typeConfig.accept}
+                onChange={handleFileUpload}
+                className="hidden"
+              />
+              <div
+                onClick={() => !uploading && fileInputRef.current?.click()}
+                className={`border-2 border-dashed rounded-sm p-8 text-center transition-colors cursor-pointer ${
+                  uploading ? 'border-gray-200 bg-gray-50 cursor-not-allowed' : 'border-gray-200 hover:border-[#C8102E] hover:bg-red-50/20'
                 }`}
               >
-                <Upload size={12} />
-                Upload from Device
-              </button>
-              <button
-                type="button"
-                onClick={() => { setInputMode('url'); }}
-                className={`flex items-center gap-1.5 px-4 py-2 text-xs font-semibold transition-colors ${
-                  inputMode === 'url' ? 'bg-[#C8102E] text-white' : 'text-gray-600 hover:bg-gray-50'
-                }`}
-              >
-                <Link size={12} />
-                Enter URL
-              </button>
-            </div>
-
-            {/* Upload Mode */}
-            {inputMode === 'upload' && (
-              <div>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept={form.content_type === 'image' ? 'image/*' : 'video/*'}
-                  onChange={handleFileUpload}
-                  className="hidden"
-                />
-                <div
-                  onClick={() => !uploading && fileInputRef.current?.click()}
-                  className={`border-2 border-dashed rounded-sm p-8 text-center transition-colors cursor-pointer ${
-                    uploading ? 'border-gray-200 bg-gray-50 cursor-not-allowed' : 'border-gray-200 hover:border-[#C8102E] hover:bg-red-50/30'
-                  }`}
-                >
-                  {uploading ? (
-                    <div className="flex flex-col items-center gap-2">
-                      <Loader2 size={28} className="text-[#C8102E] animate-spin" />
-                      <p className="text-sm text-gray-500">Uploading...</p>
-                      <div className="w-48 h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-[#C8102E] transition-all duration-300"
-                          style={{ width: `${uploadProgress}%` }}
-                        />
-                      </div>
+                {uploading ? (
+                  <div className="flex flex-col items-center gap-2">
+                    <Loader2 size={28} className="text-[#C8102E] animate-spin" />
+                    <p className="text-sm text-gray-500">Uploading…</p>
+                    <div className="w-48 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                      <div className="h-full bg-[#C8102E] animate-pulse w-3/4" />
                     </div>
-                  ) : form.content_url && inputMode === 'upload' ? (
-                    <div className="flex flex-col items-center gap-2">
-                      {form.content_type === 'image' ? (
-                        <ImageIcon size={24} className="text-green-500" />
-                      ) : (
-                        <Film size={24} className="text-green-500" />
-                      )}
-                      <p className="text-sm text-green-600 font-medium">File uploaded successfully!</p>
-                      <p className="text-xs text-gray-400 break-all max-w-sm">{form.content_url.split('/').pop()}</p>
-                      <button
-                        type="button"
-                        onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
-                        className="mt-1 text-xs text-[#C8102E] underline"
-                      >
-                        Replace file
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center gap-2">
-                      {form.content_type === 'image' ? (
-                        <ImageIcon size={28} className="text-gray-300" />
-                      ) : (
-                        <Film size={28} className="text-gray-300" />
-                      )}
-                      <p className="text-sm font-semibold text-gray-500">
-                        Click to upload {form.content_type === 'image' ? 'an image' : 'a video'}
-                      </p>
-                      <p className="text-xs text-gray-400">
-                        {form.content_type === 'image'
-                          ? 'JPG, PNG, GIF, WebP — max 50MB'
-                          : 'MP4, WebM, MOV — max 50MB'}
-                      </p>
-                    </div>
-                  )}
-                </div>
+                  </div>
+                ) : hasUpload ? (
+                  /* ── Uploaded success state (no video preview — avoids CORS/codec errors) ── */
+                  <div className="flex flex-col items-center gap-2">
+                    <CheckCircle2 size={28} className="text-green-500" />
+                    <p className="text-sm font-semibold text-green-600">
+                      {isVideo ? 'Video' : 'Image'} uploaded successfully!
+                    </p>
+                    <p className="text-xs text-gray-400 max-w-xs truncate">{uploadedFileName}</p>
+                    {/* Show image preview for creatives only — safe to preview */}
+                    {isImage && form.content_url && (
+                      <img
+                        src={form.content_url}
+                        alt="Preview"
+                        className="mt-2 max-h-36 max-w-xs rounded object-contain border border-gray-200"
+                      />
+                    )}
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
+                      className="mt-1 text-xs text-[#C8102E] underline"
+                    >
+                      Replace file
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center gap-2">
+                    {isVideo ? <Film size={28} className="text-gray-300" /> : <ImageIcon size={28} className="text-gray-300" />}
+                    <p className="text-sm font-semibold text-gray-500">
+                      Click to upload {isVideo ? 'a video' : 'an image'}
+                    </p>
+                    <p className="text-xs text-gray-400">{typeConfig.hint}</p>
+                  </div>
+                )}
               </div>
-            )}
+            </>
+          )}
 
-            {/* URL Mode */}
-            {inputMode === 'url' && (
+          {/* URL mode */}
+          {inputMode === 'url' && (
+            <>
               <input
                 value={form.content_url}
                 onChange={handleUrlChange}
                 className={fieldClass}
-                placeholder={
-                  form.content_type === 'image'
-                    ? 'https://example.com/image.jpg'
-                    : 'https://example.com/video.mp4 (direct MP4 URL)'
-                }
+                placeholder={isVideo ? 'https://youtube.com/... or direct .mp4 URL' : 'https://example.com/image.jpg'}
               />
-            )}
-
-            {/* Preview */}
-            {previewUrl && (
-              <div className="mt-3 rounded-sm overflow-hidden border border-gray-200 bg-gray-50">
-                {form.content_type === 'image' ? (
+              {/* URL preview — image only (video URLs from external sources often fail preview due to CORS) */}
+              {urlPreview && isImage && (
+                <div className="mt-3 rounded-sm overflow-hidden border border-gray-200 bg-gray-50">
                   <img
-                    src={previewUrl}
+                    src={urlPreview}
                     alt="Preview"
                     className="max-h-48 w-full object-contain"
-                    onError={() => setError('Could not load image preview — check the URL')}
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                   />
-                ) : (
-                  <video
-                    src={previewUrl}
-                    controls
-                    className="max-h-48 w-full"
-                    onError={() => setError('Could not load video preview — check the URL or file')}
-                  >
-                    Your browser does not support the video tag.
-                  </video>
-                )}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Text Content */}
-        {form.content_type === 'text' && (
-          <div className="md:col-span-2">
-            <label className={labelClass}>Text Content *</label>
-            <textarea
-              name="content_text"
-              value={form.content_text}
-              onChange={handleChange}
-              rows={6}
-              className={`${fieldClass} resize-y`}
-              placeholder="Write your content here..."
-            />
-          </div>
-        )}
+                </div>
+              )}
+              {/* For video URLs show a note instead of trying to embed */}
+              {urlPreview && isVideo && (
+                <div className="mt-3 flex items-center gap-3 p-3 bg-blue-50 border border-blue-100 rounded-sm">
+                  <Film size={16} className="text-blue-400 shrink-0" />
+                  <p className="text-xs text-blue-600">
+                    Video URL saved. Preview not shown in admin to avoid CORS errors — it will play correctly on the client page.
+                  </p>
+                </div>
+              )}
+            </>
+          )}
+        </div>
 
         {/* Description */}
         <div className="md:col-span-2">
@@ -359,7 +387,7 @@ export default function ContentForm({ initial, onSuccess, onCancel }: ContentFor
             onChange={handleChange}
             rows={3}
             className={`${fieldClass} resize-none`}
-            placeholder="Brief description or caption..."
+            placeholder="Brief description or caption…"
           />
         </div>
 
@@ -369,16 +397,110 @@ export default function ContentForm({ initial, onSuccess, onCancel }: ContentFor
           <input name="client_name" value={form.client_name} onChange={handleChange} className={fieldClass} placeholder="Client company name" />
         </div>
 
-        {/* Client Logo */}
+        {/* ── Client Logo — upload or URL ── */}
         <div>
-          <label className={labelClass}>Client Logo URL</label>
-          <input name="client_logo_url" value={form.client_logo_url} onChange={handleChange} className={fieldClass} placeholder="https://..." />
+          <label className={labelClass}>Client Logo</label>
+
+          {/* Logo mode toggle */}
+          <div className="flex rounded-sm border border-gray-200 overflow-hidden mb-2 w-fit">
+            <button
+              type="button"
+              onClick={() => setLogoMode('upload')}
+              className={`flex items-center gap-1 px-3 py-1.5 text-[11px] font-semibold transition-colors ${logoMode === 'upload' ? 'bg-[#C8102E] text-white' : 'text-gray-600 hover:bg-gray-50'}`}
+            >
+              <Upload size={10} /> Upload
+            </button>
+            <button
+              type="button"
+              onClick={() => setLogoMode('url')}
+              className={`flex items-center gap-1 px-3 py-1.5 text-[11px] font-semibold transition-colors ${logoMode === 'url' ? 'bg-[#C8102E] text-white' : 'text-gray-600 hover:bg-gray-50'}`}
+            >
+              <Link size={10} /> URL
+            </button>
+          </div>
+
+          {/* Logo upload */}
+          {logoMode === 'upload' && (
+            <>
+              <input
+                ref={logoInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleLogoUpload}
+                className="hidden"
+              />
+              <div
+                onClick={() => !logoUploading && logoInputRef.current?.click()}
+                className={`border border-dashed rounded-sm p-4 text-center cursor-pointer transition-colors ${
+                  logoUploading ? 'border-gray-200 bg-gray-50 cursor-not-allowed' : 'border-gray-200 hover:border-[#C8102E] hover:bg-red-50/20'
+                }`}
+              >
+                {logoUploading ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <Loader2 size={16} className="text-[#C8102E] animate-spin" />
+                    <span className="text-xs text-gray-500">Uploading logo…</span>
+                  </div>
+                ) : logoPreview ? (
+                  <div className="flex flex-col items-center gap-1.5">
+                    <img src={logoPreview} alt="Logo" className="h-10 object-contain rounded" />
+                    <p className="text-[11px] text-green-600 font-medium">
+                      {logoFileName || 'Logo uploaded'}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); logoInputRef.current?.click(); }}
+                      className="text-[11px] text-[#C8102E] underline"
+                    >
+                      Replace
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center gap-1">
+                    <ImageIcon size={18} className="text-gray-300" />
+                    <p className="text-xs text-gray-500">Click to upload logo</p>
+                    <p className="text-[11px] text-gray-400">PNG, SVG, JPG — max 5MB</p>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+
+          {/* Logo URL */}
+          {logoMode === 'url' && (
+            <div>
+              <input
+                name="client_logo_url"
+                value={form.client_logo_url}
+                onChange={(e) => {
+                  setForm((prev: any) => ({ ...prev, client_logo_url: e.target.value }));
+                  setLogoPreview(e.target.value);
+                }}
+                className={fieldClass}
+                placeholder="https://..."
+              />
+              {logoPreview && (
+                <img
+                  src={logoPreview}
+                  alt="Logo preview"
+                  className="mt-2 h-10 object-contain rounded border border-gray-200 bg-gray-50 px-2"
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                />
+              )}
+            </div>
+          )}
         </div>
 
         {/* Display Order */}
         <div>
           <label className={labelClass}>Display Order</label>
-          <input name="display_order" type="number" value={form.display_order} onChange={handleChange} className={fieldClass} min={0} />
+          <input
+            name="display_order"
+            type="number"
+            value={form.display_order}
+            onChange={handleChange}
+            className={fieldClass}
+            min={0}
+          />
         </div>
 
         {/* Featured */}
@@ -406,11 +528,11 @@ export default function ContentForm({ initial, onSuccess, onCancel }: ContentFor
         </button>
         <button
           type="submit"
-          disabled={saving || uploading}
+          disabled={saving || uploading || logoUploading}
           className="flex items-center gap-2 px-6 py-2.5 bg-[#C8102E] text-white text-sm font-semibold rounded-sm hover:bg-[#a50d25] disabled:opacity-60 transition-colors duration-200"
         >
           <Save size={14} />
-          {saving ? 'Saving...' : initial?.id ? 'Update Content' : 'Add Content'}
+          {saving ? 'Saving…' : (initial as any)?.id ? 'Update Content' : 'Add Content'}
         </button>
       </div>
     </form>

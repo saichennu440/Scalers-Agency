@@ -1,5 +1,4 @@
-export type ContentType = 'image' | 'video' | 'text';
-
+export type ContentType = 'reels' | 'videos' | 'creatives' | 'image' | 'video' | 'text';
 export interface ClientContent {
   id: string;
   title: string;

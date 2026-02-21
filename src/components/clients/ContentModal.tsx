@@ -58,7 +58,10 @@ function VideoPlayer({ url }: { url: string }) {
 }
 
 export default function ContentModal({ content, onClose }: ContentModalProps) {
-  const isVideo  = content.content_type === 'video';
+ const isVideo =
+  content.content_type === 'video' ||
+  content.content_type === 'videos' ||
+  content.content_type === 'reels';
   const ytId     = content.content_url ? getYouTubeId(content.content_url) : null;
   const vimeoId  = content.content_url ? getVimeoId(content.content_url)   : null;
   const isEmbed  = !!(ytId || vimeoId);

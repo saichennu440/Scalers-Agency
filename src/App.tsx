@@ -17,17 +17,30 @@ function getPageFromHash(): Page {
 }
 
 export default function App() {
-  const [currentPage, setCurrentPage] = useState<Page>(getPageFromHash);
+  const [currentPage,     setCurrentPage]     = useState<Page>(getPageFromHash);
+  const [clientsCategory, setClientsCategory] = useState<string>('all');
 
   const navigate = (page: Page) => {
     setCurrentPage(page);
     window.location.hash = page === 'home' ? '' : page;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // Called when user picks a category from the Clients dropdown in the header
+  const handleClientsCategory = (category: string) => {
+    setClientsCategory(category);
+    setCurrentPage('clients');
+    window.location.hash = 'clients';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Reset category to 'all' when navigating away from clients
   useEffect(() => {
-    const handleHashChange = () => {
-      setCurrentPage(getPageFromHash());
-    };
+    if (currentPage !== 'clients') setClientsCategory('all');
+  }, [currentPage]);
+
+  useEffect(() => {
+    const handleHashChange = () => setCurrentPage(getPageFromHash());
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
@@ -36,15 +49,21 @@ export default function App() {
 
   return (
     <div className="min-h-screen">
-      <Header currentPage={currentPage} onNavigate={navigate} />
+      <Header
+        currentPage={currentPage}
+        onNavigate={navigate}
+        onClientsCategory={handleClientsCategory}
+      />
+
       <main>
-        {currentPage === 'home' && <HomePage onNavigate={navigate} />}
-        {currentPage === 'clients' && <ClientsPage />}
+        {currentPage === 'home'     && <HomePage    onNavigate={navigate} />}
+        {currentPage === 'clients'  && <ClientsPage initialCategory={clientsCategory} />}
         {currentPage === 'services' && <ServicesPage onNavigate={navigate} />}
-        {currentPage === 'about' && <AboutPage onNavigate={navigate} />}
-        {currentPage === 'contact' && <ContactPage />}
-        {currentPage === 'admin' && <AdminPage />}
+        {currentPage === 'about'    && <AboutPage   onNavigate={navigate} />}
+        {currentPage === 'contact'  && <ContactPage />}
+        {currentPage === 'admin'    && <AdminPage   />}
       </main>
+
       {showFooter && <Footer onNavigate={navigate} />}
     </div>
   );

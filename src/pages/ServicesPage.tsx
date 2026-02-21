@@ -101,7 +101,7 @@ export default function ServicesPage({ onNavigate }: ServicesPageProps) {
       <section className="relative min-h-[70vh] bg-[#D91E36] flex flex-col overflow-hidden">
         {/* diagonal slice */}
         <div
-          className="absolute bottom-0 left-0 right-0 h-24 bg-[#E8E4D9] z-10"
+          className="absolute bottom-0 left-0 right-0 h-24 bg-[#E8E4D9] z-10 pointer-events-none" 
           style={{ clipPath: 'polygon(0 100%, 100% 0, 100% 100%)' }}
         />
         {/* noise texture overlay */}
