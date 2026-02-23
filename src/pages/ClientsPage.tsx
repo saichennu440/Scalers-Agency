@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase';
 import { ClientContent } from '../lib/types';
 import ClientCard from '../components/clients/ClientCard';
 import ContentModal from '../components/clients/ContentModal';
-import { Search, X, Play, SlidersHorizontal } from 'lucide-react';
+import { Search, X, Play, SlidersHorizontal, Volume2, VolumeX, ChevronUp } from 'lucide-react';
 
 interface ClientsPageProps {
   initialCategory?: string;
@@ -21,25 +21,27 @@ const FILTER_OPTIONS: { value: ContentFilter; label: string }[] = [
 
 /* ═══════════════════════════════════════════════════════════
    MOBILE REEL ITEM
-   Fix: blurred-backdrop technique so nothing is cropped.
-   - Background layer: same media, object-cover + heavy blur
-     → fills the frame edge-to-edge with no black bars
-   - Foreground layer: same media, object-contain
-     → entire image / video fully visible, never cut off
+   - Tap video area   → toggle mute / unmute
+   - "View details" button → open modal
+   - Videos autoplay muted (browser requirement), tap to hear
 ═══════════════════════════════════════════════════════════ */
 function ReelItem({
   item,
   isActive,
-  onClick,
+  isMuted,
+  onToggleMute,
+  onOpenModal,
 }: {
   item: ClientContent;
   isActive: boolean;
-  onClick: () => void;
+  isMuted: boolean;
+  onToggleMute: () => void;
+  onOpenModal: () => void;
 }) {
   const fgVideoRef = useRef<HTMLVideoElement>(null);
   const bgVideoRef = useRef<HTMLVideoElement>(null);
 
-  // Sync play / pause on both video layers
+  // Play / pause when active changes
   useEffect(() => {
     [fgVideoRef, bgVideoRef].forEach(ref => {
       const el = ref.current;
@@ -49,119 +51,105 @@ function ReelItem({
     });
   }, [isActive]);
 
+  // Sync muted state to the foreground video element
+  useEffect(() => {
+    const el = fgVideoRef.current;
+    if (!el) return;
+    el.muted = isMuted;
+  }, [isMuted]);
+
   function getYouTubeId(url: string) {
     const m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
     return m ? m[1] : null;
   }
 
-  const ytId  = item.content_url ? getYouTubeId(item.content_url) : null;
-  const isVid = item.content_type === 'reels' || item.content_type === 'videos' || item.content_type === 'video';
-  const isImg = item.content_type === 'creatives' || item.content_type === 'image';
-
-  // Thumbnail URL for YouTube
+  const ytId    = item.content_url ? getYouTubeId(item.content_url) : null;
+  const isVid   = item.content_type === 'reels' || item.content_type === 'videos' || item.content_type === 'video';
+  const isImg   = item.content_type === 'creatives' || item.content_type === 'image';
   const ytThumb = ytId ? `https://img.youtube.com/vi/${ytId}/maxresdefault.jpg` : null;
+
+  // For images and YouTube thumbs there's no in-feed audio, so mute toggle is irrelevant
+  const hasInFeedAudio = isVid && !ytId;
 
   return (
     <div
-      className="relative w-full flex-shrink-0 snap-start snap-always overflow-hidden bg-black cursor-pointer"
+      className="relative w-full flex-shrink-0 snap-start snap-always overflow-hidden bg-black"
       style={{ height: '100svh' }}
-      onClick={onClick}
     >
-      {/* ─────────────────────────────────────────────────────────
-          LAYER 1 — Blurred background (covers the whole frame)
-          Uses object-cover + blur so there are zero black bars.
-          aria-hidden because it's purely decorative.
-      ───────────────────────────────────────────────────────── */}
+      {/* ── Blurred background layer ── */}
       {isImg && item.content_url && (
-        <img
-          src={item.content_url}
-          alt=""
-          aria-hidden
+        <img src={item.content_url} alt="" aria-hidden
           className="absolute inset-0 w-full h-full object-cover"
-          style={{ filter: 'blur(30px)', transform: 'scale(1.18)', opacity: 0.7 }}
-        />
+          style={{ filter: 'blur(30px)', transform: 'scale(1.18)', opacity: 0.7 }} />
       )}
       {isVid && (ytThumb ? (
-        <img
-          src={ytThumb}
-          alt=""
-          aria-hidden
+        <img src={ytThumb} alt="" aria-hidden
           className="absolute inset-0 w-full h-full object-cover"
-          style={{ filter: 'blur(30px)', transform: 'scale(1.18)', opacity: 0.7 }}
-        />
+          style={{ filter: 'blur(30px)', transform: 'scale(1.18)', opacity: 0.7 }} />
       ) : item.content_url ? (
-        <video
-          ref={bgVideoRef}
-          src={item.content_url}
-          loop muted playsInline
+        <video ref={bgVideoRef} src={item.content_url} loop muted playsInline
           className="absolute inset-0 w-full h-full object-cover"
-          style={{ filter: 'blur(30px)', transform: 'scale(1.18)', opacity: 0.7 }}
-        />
+          style={{ filter: 'blur(30px)', transform: 'scale(1.18)', opacity: 0.7 }} />
       ) : null)}
 
-      {/* Dark scrim so blurred bg doesn't overpower the foreground media */}
       <div className="absolute inset-0 bg-black/45" />
 
-      {/* ─────────────────────────────────────────────────────────
-          LAYER 2 — Actual media (object-contain = never cropped)
-          Portrait reels naturally fill a 9:16 screen.
-          Landscape videos and tall posters sit centred with the
-          blurred bg elegantly filling the remaining space.
-      ───────────────────────────────────────────────────────── */}
-      {isImg && item.content_url && (
-        <img
-          src={item.content_url}
-          alt={item.title}
-          className="absolute inset-0 w-full h-full object-contain"
-          style={{ zIndex: 1 }}
-        />
-      )}
-      {isVid && (ytThumb ? (
-        <img
-          src={ytThumb}
-          alt={item.title}
-          className="absolute inset-0 w-full h-full object-contain"
-          style={{ zIndex: 1 }}
-        />
-      ) : item.content_url ? (
-        <video
-          ref={fgVideoRef}
-          src={item.content_url}
-          loop muted playsInline
-          className="absolute inset-0 w-full h-full object-contain"
-          style={{ zIndex: 1 }}
-        />
-      ) : null)}
-
-      {/* ─────────────────────────────────────────────────────────
-          LAYER 3 — Gradient overlay for text readability
-      ───────────────────────────────────────────────────────── */}
+      {/* ── Foreground media layer — tappable to toggle audio ── */}
       <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          zIndex: 2,
-          background: 'linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.0) 42%, rgba(0,0,0,0.30) 100%)',
-        }}
-      />
+        className="absolute inset-0 cursor-pointer"
+        style={{ zIndex: 1 }}
+        onClick={hasInFeedAudio ? onToggleMute : undefined}
+      >
+        {isImg && item.content_url && (
+          <img src={item.content_url} alt={item.title}
+            className="absolute inset-0 w-full h-full object-contain" />
+        )}
+        {isVid && (ytThumb ? (
+          <img src={ytThumb} alt={item.title}
+            className="absolute inset-0 w-full h-full object-contain" />
+        ) : item.content_url ? (
+          <video
+            ref={fgVideoRef}
+            src={item.content_url}
+            loop
+            muted       /* starts muted; we imperatively toggle via ref */
+            playsInline
+            className="absolute inset-0 w-full h-full object-contain"
+          />
+        ) : null)}
+      </div>
 
-      {/* ── Play button (video types only) ── */}
-      {isVid && (
-        <div
-          className="absolute inset-0 flex items-center justify-center pointer-events-none"
-          style={{ zIndex: 3 }}
-        >
+      {/* ── Gradient overlay ── */}
+      <div className="absolute inset-0 pointer-events-none"
+        style={{ zIndex: 2, background: 'linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.0) 42%, rgba(0,0,0,0.30) 100%)' }} />
+
+      {/* ── Play icon (YouTube / image — no in-feed audio) ── */}
+      {isVid && !hasInFeedAudio && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ zIndex: 3 }}>
           <div className="w-[72px] h-[72px] rounded-full bg-white/12 border border-white/25 backdrop-blur-sm flex items-center justify-center">
             <Play size={26} className="text-white ml-1" fill="white" />
           </div>
         </div>
       )}
 
+      {/* ── Mute / unmute indicator (direct video only) ── */}
+      {hasInFeedAudio && (
+        <button
+          onClick={onToggleMute}
+          className="absolute bottom-[168px] right-4 w-10 h-10 rounded-full bg-black/40 border border-white/20 backdrop-blur-sm flex items-center justify-center text-white transition-all duration-200 active:scale-90"
+          style={{ zIndex: 5 }}
+          aria-label={isMuted ? 'Unmute video' : 'Mute video'}
+        >
+          {isMuted
+            ? <VolumeX size={17} className="text-white/70" />
+            : <Volume2 size={17} className="text-white" />
+          }
+        </button>
+      )}
+
       {/* ── Featured badge ── */}
       {item.is_featured && (
-        <div
-          className="absolute top-[88px] right-4 px-3 py-1 rounded-full bg-amber-400/90 backdrop-blur-sm text-[10px] font-bold text-black tracking-wide"
-          style={{ zIndex: 4 }}
-        >
+        <div className="absolute top-[88px] right-4 px-3 py-1 rounded-full bg-amber-400/90 backdrop-blur-sm text-[10px] font-bold text-black tracking-wide" style={{ zIndex: 4 }}>
           ★ Featured
         </div>
       )}
@@ -173,25 +161,37 @@ function ReelItem({
         </span>
       </div>
 
-      {/* ── Bottom info overlay ── */}
-      <div
-        className="absolute bottom-0 left-0 right-0 px-5 pb-10 pt-20 pointer-events-none"
-        style={{ zIndex: 4 }}
-      >
+      {/* ── Bottom info + View Details button ── */}
+      <div className="absolute bottom-0 left-0 right-0 px-5 pb-8 pt-20" style={{ zIndex: 4 }}>
         {item.category && (
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#D91E36]/75 backdrop-blur-sm mb-3">
             <span className="w-1.5 h-1.5 rounded-full bg-white" />
             <span className="text-white text-[10px] font-bold tracking-[0.2em] uppercase">{item.category}</span>
           </div>
         )}
-        <h3 className="text-white font-serif text-2xl leading-snug mb-1">{item.title}</h3>
+        <h3 className="text-white font-serif text-2xl leading-snug mb-1 pointer-events-none">{item.title}</h3>
         {item.client_name && (
-          <p className="text-white/45 text-[11px] font-bold tracking-[0.2em] uppercase">{item.client_name}</p>
+          <p className="text-white/45 text-[11px] font-bold tracking-[0.2em] uppercase pointer-events-none">{item.client_name}</p>
         )}
         {item.description && (
-          <p className="text-white/55 text-sm mt-2 leading-relaxed line-clamp-2">{item.description}</p>
+          <p className="text-white/55 text-sm mt-2 leading-relaxed line-clamp-2 pointer-events-none">{item.description}</p>
         )}
-        <p className="text-white/20 text-[10px] mt-4 tracking-widest uppercase">Tap to view details</p>
+
+        {/* "View Details" — explicit button instead of tapping the whole card */}
+        <button
+          onClick={onOpenModal}
+          className="mt-4 flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 border border-white/25 backdrop-blur-sm text-white text-xs font-semibold tracking-wide hover:bg-white/20 active:scale-95 transition-all duration-200"
+        >
+          <ChevronUp size={13} />
+          View Details
+        </button>
+
+        {/* Subtle tap-to-unmute hint shown only when muted video is active */}
+        {hasInFeedAudio && isMuted && isActive && (
+          <p className="text-white/25 text-[10px] mt-3 tracking-widest uppercase pointer-events-none">
+            Tap video to hear audio
+          </p>
+        )}
       </div>
     </div>
   );
@@ -209,6 +209,10 @@ export default function ClientsPage({ initialCategory = 'all' }: ClientsPageProp
   const [activeCategory, setActiveCategory] = useState(initialCategory);
   const [activeReelIdx,  setActiveReelIdx]  = useState(0);
   const [filterOpen,     setFilterOpen]     = useState(false);
+
+  // Global mute state — one toggle controls all reels (like TikTok)
+  const [globalMuted, setGlobalMuted] = useState(true);
+
   const reelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => { setActiveCategory(initialCategory); setActiveReelIdx(0); }, [initialCategory]);
@@ -276,6 +280,7 @@ export default function ClientsPage({ initialCategory = 'all' }: ClientsPageProp
   useEffect(() => {
     if (reelRef.current) reelRef.current.scrollTop = 0;
     setActiveReelIdx(0);
+    setGlobalMuted(true); // reset to muted when filter changes
   }, [activeCategory, activeFilter]);
 
   return (
@@ -314,7 +319,9 @@ export default function ClientsPage({ initialCategory = 'all' }: ClientsPageProp
               key={item.id}
               item={item}
               isActive={i === activeReelIdx}
-              onClick={() => setSelectedItem(item)}
+              isMuted={globalMuted}
+              onToggleMute={() => setGlobalMuted(m => !m)}
+              onOpenModal={() => setSelectedItem(item)}
             />
           ))}
         </div>
