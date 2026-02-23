@@ -76,7 +76,7 @@ export default function Footer({ onNavigate }: FooterProps) {
             <ul className="space-y-4">
               <li className="flex items-start gap-3">
                 <MapPin size={16} className="text-[#C8102E] mt-0.5 shrink-0" />
-                <span className="text-sm text-gray-400">ICP 800 Jubilee <br/>Plot number 800, Road No. 36, near metro pillar no. C1669, CBI Colony, Jubilee Hills<br /> Hyderabad, Telangana 500033</span>
+                <span className="text-sm text-gray-400">3rd Floor, ICP 800 Jubilee <br/> Road No. 36, Jubilee Hills<br /> Hyderabad, Telangana 500033</span>
               </li>
               <li className="flex items-center gap-3">
                 <Phone size={16} className="text-[#C8102E] shrink-0" />
@@ -95,11 +95,22 @@ export default function Footer({ onNavigate }: FooterProps) {
             &copy; {new Date().getFullYear()} Scalers Business Agency. All rights reserved.
           </p>
           <div className="flex gap-6">
-            <a href="#" className="text-xs text-gray-500 hover:text-gray-300 transition-colors">Privacy Policy</a>
-            <a href="#" className="text-xs text-gray-500 hover:text-gray-300 transition-colors">Terms of Service</a>
+            <button
+              onClick={() => handleNav('privacy')}
+              className="text-xs text-gray-500 hover:text-[#C8102E] transition-colors duration-200"
+            >
+              Privacy Policy
+            </button>
+            <button
+              onClick={() => handleNav('tos')}
+              className="text-xs text-gray-500 hover:text-[#C8102E] transition-colors duration-200"
+            >
+              Terms of Service
+            </button>
           </div>
         </div>
       </div>
     </footer>
   );
 }
+

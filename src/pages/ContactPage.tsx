@@ -156,9 +156,9 @@ export default function ContactPage({ onNavigate }: ContactPageProps) {
             backgroundSize: '180px',
           }}
         />
-        <div className="absolute right-4 bottom-10 text-white/[0.045] text-[12rem] md:text-[18rem] font-black font-serif leading-none select-none pointer-events-none">
+        {/* <div className="absolute right-4 bottom-10 text-white/[0.045] text-[12rem] md:text-[18rem] font-black font-serif leading-none select-none pointer-events-none">
           HI
-        </div>
+        </div> */}
         <div
           className="absolute bottom-0 left-0 right-0 h-16 bg-[#E8E4D9] z-10"
           style={{ clipPath: 'polygon(0 100%, 100% 0, 100% 100%)' }}
@@ -224,9 +224,10 @@ export default function ContactPage({ onNavigate }: ContactPageProps) {
                     icon: MapPin,
                     label: 'Office',
                     content: (
+                      <a href="https://maps.app.goo.gl/NoeoK8QP3TPjMvCH8" target="_blank" rel="noopener noreferrer" className="text-[#8B1E32] hover:text-[#D91E36] transition-colors font-medium">
                       <p className="text-[#8B1E32] font-medium">
-                        ICP 800 Jubilee <br />Jubilee Hills, Hyderabad, Telangana 500033
-                      </p>
+                        3rd Floor, ICP 800 Jubilee <br />Jubilee Hills, Hyderabad, Telangana 500033
+                      </p></a>
                     ),
                   },
                 ].map(({ icon: Icon, label, content }) => (

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Menu, X, ChevronDown } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Page } from '../../lib/types';
 import { supabase } from '../../lib/supabase';
 
@@ -31,7 +32,7 @@ export default function Header({ currentPage, onNavigate, onClientsCategory }: H
     return () => window.removeEventListener('scroll', fn);
   }, []);
 
-  /* ── Fetch categories from the categories table (not client_content) ── */
+  /* ── Fetch categories from the categories table ── */
   useEffect(() => {
     const load = async () => {
       const { data } = await supabase
@@ -42,7 +43,6 @@ export default function Header({ currentPage, onNavigate, onClientsCategory }: H
     };
     load();
 
-    // Realtime: update instantly when admin adds/deletes a category
     const ch = supabase
       .channel('header-categories')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'categories' }, load)
@@ -74,9 +74,7 @@ export default function Header({ currentPage, onNavigate, onClientsCategory }: H
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const isHome    = currentPage === 'home';
   const isClients = currentPage === 'clients';
-
   const navBg  = scrolled ? 'rgba(6,16,31,0.92)' : 'transparent';
   const border = scrolled ? '1px solid rgba(255,255,255,0.06)' : 'none';
 
@@ -90,12 +88,72 @@ export default function Header({ currentPage, onNavigate, onClientsCategory }: H
 
           {/* ── Logo ── */}
           <button onClick={() => goPage('home')} className="flex items-center gap-2.5 group">
-            <div className="w-9 h-9 shrink-0">
-              <svg viewBox="0 0 40 40" className="w-full h-full">
-                <polygon points="20,5 35,35 20,25 5,35" fill="#D91E36" opacity="0.5" />
-                <polygon points="20,5 35,35 32,33 20,25 20,24" fill="#D91E36" />
-              </svg>
+            {/*
+              Two logos stacked in the same 36×36 box.
+              AnimatePresence swaps them with a quick cross-fade.
+              Key change forces remount → white logo re-animates on first load.
+            */}
+            <div className="relative w-9 h-9 shrink-0">
+              <AnimatePresence mode="wait" initial={false}>
+                {!scrolled ? (
+                  /* ── WHITE animated logo — shown before scroll ── */
+                  <motion.div
+                    key="white"
+                    className="absolute inset-0"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <svg viewBox="0 0 40 40" className="w-full h-full" fill="none">
+                      {/* Back polygon — white 45% */}
+                      <motion.polygon
+                        points="20,5 35,35 20,25 5,35"
+                        fill="white"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 0.45 }}
+                        transition={{ duration: 0.5, delay: 0.15 }}
+                      />
+                      {/* Front polygon — solid white, grows from top */}
+                      <motion.polygon
+                        points="20,5 35,35 32,33 20,25 20,24"
+                        fill="white"
+                        initial={{ opacity: 0, scaleY: 0 }}
+                        animate={{ opacity: 1, scaleY: 1 }}
+                        style={{ transformOrigin: '20px 5px' }}
+                        transition={{ duration: 0.55, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                      />
+                      {/* Inner shine */}
+                      <motion.line
+                        x1="20" y1="5" x2="20" y2="25"
+                        stroke="white"
+                        strokeWidth="0.6"
+                        strokeOpacity="0.25"
+                        initial={{ pathLength: 0 }}
+                        animate={{ pathLength: 1 }}
+                        transition={{ duration: 0.5, delay: 0.65 }}
+                      />
+                    </svg>
+                  </motion.div>
+                ) : (
+                  /* ── RED static logo — shown after scroll ── */
+                  <motion.div
+                    key="red"
+                    className="absolute inset-0"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <svg viewBox="0 0 40 40" className="w-full h-full">
+                      <polygon points="20,5 35,35 20,25 5,35" fill="#D91E36" opacity="0.5" />
+                      <polygon points="20,5 35,35 32,33 20,25 20,24" fill="#D91E36" />
+                    </svg>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
+
             <div className="flex flex-col leading-none">
               <span className="text-xl font-bold text-white tracking-widest">SCALERS</span>
               <span className="text-[8px] tracking-[0.2em] font-light text-white/60">BUSINESS AGENCY</span>
@@ -141,15 +199,12 @@ export default function Header({ currentPage, onNavigate, onClientsCategory }: H
                     style={{ background: 'rgba(8,14,26,0.97)', backdropFilter: 'blur(24px)' }}
                     onMouseLeave={() => setDropOpen(false)}
                   >
-                    {/* All Work */}
                     <button
                       onClick={() => goCategory('all')}
                       className="w-full text-left px-5 py-3.5 text-[11px] font-bold text-white/50 hover:text-white hover:bg-white/6 uppercase tracking-[0.22em] transition-colors border-b border-white/6"
                     >
                       All Work
                     </button>
-
-                    {/* One row per category (from categories table) */}
                     {categories.map(cat => (
                       <button
                         key={cat}
@@ -160,7 +215,6 @@ export default function Header({ currentPage, onNavigate, onClientsCategory }: H
                         {cat}
                       </button>
                     ))}
-
                     {categories.length === 0 && (
                       <div className="px-5 py-4 text-[11px] text-white/20 italic">
                         No categories yet — add them in admin.

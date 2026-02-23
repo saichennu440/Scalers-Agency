@@ -8,8 +8,10 @@ import ServicesPage from './pages/ServicesPage';
 import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
 import AdminPage from './pages/AdminPage';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsOfService from './pages/TermsOfService';
 
-const validPages: Page[] = ['home', 'clients', 'services', 'about', 'contact', 'admin'];
+const validPages: Page[] = ['home', 'clients', 'services', 'about', 'contact', 'admin', 'privacy', 'tos'];
 
 function getPageFromHash(): Page {
   const hash = window.location.hash.replace('#', '') as Page;
@@ -62,6 +64,8 @@ export default function App() {
         {currentPage === 'about'    && <AboutPage   onNavigate={navigate} />}
         {currentPage === 'contact'  && <ContactPage />}
         {currentPage === 'admin'    && <AdminPage   />}
+        {currentPage === 'privacy'  && <PrivacyPolicy  onNavigate={navigate} />}
+        {currentPage === 'tos'      && <TermsOfService onNavigate={navigate} />}
       </main>
 
       {showFooter && <Footer onNavigate={navigate} />}

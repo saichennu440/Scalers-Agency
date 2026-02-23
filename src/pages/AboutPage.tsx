@@ -48,7 +48,7 @@ export default function About({ onNavigate }: AboutProps) {
         <div className="bg-[#E8E4D9] min-h-screen">
             {/* Hero */}
             <section className="relative min-h-[70vh] bg-[#D91E36] flex flex-col overflow-hidden">
-                <div className="absolute right-4 bottom-10 text-white/[0.045] text-[16rem] font-black font-serif leading-none select-none pointer-events-none">WE</div>
+                {/* <div className="absolute right-4 bottom-10 text-white/[0.045] text-[16rem] font-black font-serif leading-none select-none pointer-events-none">WE</div> */}
                 <div className="flex-1 flex items-end pb-20 px-6 md:px-12 max-w-7xl mx-auto w-full pt-32">
                     <div className="grid md:grid-cols-2 gap-12 items-end w-full">
                         <motion.h1

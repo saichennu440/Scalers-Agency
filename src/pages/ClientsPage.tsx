@@ -454,7 +454,7 @@ export default function ClientsPage({ initialCategory = 'all' }: ClientsPageProp
             backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
             backgroundSize: '180px',
           }} />
-          <div className="absolute right-4 bottom-10 text-white/[0.045] text-[16rem] font-black font-serif leading-none select-none pointer-events-none">WORK</div>
+          {/* <div className="absolute right-4 bottom-10 text-white/[0.045] text-[16rem] font-black font-serif leading-none select-none pointer-events-none">WORK</div> */}
           <div className="absolute bottom-0 left-0 right-0 h-20 bg-[#E8E4D9] z-10" style={{ clipPath: 'polygon(0 100%, 100% 0, 100% 100%)' }} />
 
           <div className="flex-1 flex items-end pb-28 px-6 md:px-12 max-w-7xl mx-auto w-full pt-36 relative z-[1]">

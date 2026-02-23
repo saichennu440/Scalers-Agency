@@ -99,7 +99,7 @@ export default function ServicesPage({ onNavigate }: ServicesPageProps) {
 
       {/* ── Hero ─────────────────────────────────────────────────── */}
       <section className="relative min-h-[70vh] bg-[#D91E36] flex flex-col overflow-hidden">
-        <div className="absolute right-8 bottom-14 text-white/[0.045] text-[16rem] font-black font-serif leading-none select-none pointer-events-none">AID</div>
+        {/* <div className="absolute right-8 bottom-14 text-white/[0.045] text-[16rem] font-black font-serif leading-none select-none pointer-events-none">AID</div> */}
 
         {/* diagonal slice */}
         <div
@@ -125,7 +125,7 @@ export default function ServicesPage({ onNavigate }: ServicesPageProps) {
             >
               What we
               <br />
-              <span className="italic font-light">do best.</span>
+              <span className=" font-light">do best.</span>
             </motion.h1>
             <motion.div
               initial={{ opacity: 0, y: 30 }}

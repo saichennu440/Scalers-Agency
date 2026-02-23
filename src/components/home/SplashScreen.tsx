@@ -32,7 +32,7 @@ export default function SplashScreen({ onComplete }: { onComplete: () => void })
             ))}
           </div>
 
-          <div className="relative flex flex-col items-center gap-2">
+          <div className="relative flex flex-col items-center gap-0">
 
             {/* ── Logo mark — matches site header SVG exactly ── */}
             <motion.div
