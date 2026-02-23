@@ -7,27 +7,27 @@ export default function ServicesSection() {
         {
             number: '01',
             title: 'Branding',
-            description: 'Describe the service and how customers or clients can benefit from it. This is the place to add a short description with relevant details, like pricing, duration and how to book.',
+            description: 'We build brand identities that are clear, consistent and aligned with business goals. From positioning and messaging to visual direction, we create brand systems that improve recognition and strengthen market presence.',
         },
         {
             number: '02',
             title: 'Content Creation',
-            description: 'Describe the service and how customers or clients can benefit from it. This is the place to add a short description with relevant details, like pricing, duration and how to book.',
+            description: 'We develop purposeful content that communicates value and builds trust. Whether for digital platforms or campaigns, every piece is created with strategy behind it, not just aesthetics.',
         },
         {
             number: '03',
             title: 'Website Design & Development',
-            description: 'Describe the service and how customers or clients can benefit from it. This is the place to add a short description with relevant details, like pricing, duration and how to book.',
+            description: 'We design and develop structured websites that reflect your brand and support your objectives. Clean layouts, thoughtful user experience and performance-driven architecture ensure your website works as a business tool, not just a digital brochure.',
         },
         {
             number: '04',
             title: 'Social Media Management',
-            description: 'Describe the service and how customers or clients can benefit from it. This is the place to add a short description with relevant details, like pricing, duration and how to book.',
+            description: 'We manage social media with clarity and consistency. From content planning to execution, we ensure your brand voice remains aligned while building visibility and engagement over time.',
         },
         {
             number: '05',
             title: 'Digital Marketing',
-            description: 'Describe the service and how customers or clients can benefit from it. This is the place to add a short description with relevant details, like pricing, duration and how to book.',
+            description: 'We plan and execute data-informed campaigns across relevant platforms. Our focus is on measurable growth, audience targeting and optimisation that supports long-term business expansion.',
         },
     ];
 

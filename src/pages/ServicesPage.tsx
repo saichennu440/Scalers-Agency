@@ -8,50 +8,50 @@ const SERVICES = [
     id: '1',
     title: 'Branding & Identity',
     description:
-      'We craft brand identities that go far beyond logos — building a complete visual language, tone of voice, and positioning framework that resonates with your audience and stands apart in the market.',
+      'We define the strategic foundation of your brand — clarifying positioning, refining messaging, and shaping a visual identity system that ensures coherence across every touchpoint. The result is a brand that is recognisable, credible, and built for longevity.',
   },
     {
     id: '2',
     title: 'Content Creation & SEO',
     description:
-      'Long-term organic growth through strategic content, technical SEO audits, authority link-building, and editorial calendars that position your brand as an industry leader.',
+      'We develop structured content ecosystems that support both storytelling and search performance. From editorial direction to keyword architecture, our approach balances creativity with visibility.',
   },
   {
     id: '3',
     title: 'Website Design, Development & CRO',
     description:
-      'Data-driven paid campaigns across Google, Meta, and LinkedIn, engineered to maximise ROI. From targeting and creative to landing pages and attribution, every variable is optimised for growth.',
+      'We build digital platforms designed around user behaviour and business objectives. Through thoughtful design, technical precision, and conversion optimisation, your website becomes a performance-driven asset.',
   },
 
   {
     id: '4',
     title: 'Social Media Management',
     description:
-      'Consistent, compelling presence across Instagram, LinkedIn, TikTok, and X. We handle strategy, creative, scheduling, community management, and monthly performance reporting.',
+      'We oversee social presence with strategic oversight — aligning platform behaviour, content rhythm, and audience interaction to ensure consistency and sustained relevance.',
   },
   {
     id: '5',
     title: 'Digital Marketing',
     description:
-      'End-to-end funnel architecture — from awareness campaigns to nurture sequences and CRM pipelines — designed to capture, qualify, and convert high-intent prospects at scale.',
+      'We execute multi-channel campaigns with analytical discipline — refining targeting, managing budgets, and optimising performance to ensure efficiency and measurable return.',
   },
   {
     id: '6',
     title: 'Brand / Product Launches',
     description:
-      'We design and implement automated workflows, email sequences, and CRM integrations that save your team hours each week while delivering personalised experiences to every prospect.',
+      'We design launch strategies that generate traction from day one — integrating creative direction, campaign sequencing, and channel execution to establish strong market entry. ',
   },
     {
     id: '7',
     title: 'Influencer Marketing',
     description:
-      'We design and implement automated workflows, email sequences, and CRM integrations that save your team hours each week while delivering personalised experiences to every prospect.',
+      'We design influencer collaborations with strategic intent — identifying the right voices, structuring partnerships, and aligning content with brand positioning to ensure credibility, reach and measurable engagement.',
   },
     {
     id: '8',
-    title: 'Add Shoot',
+    title: 'Ad Shoot',
     description:
-      'We design and implement automated workflows, email sequences, and CRM integrations that save your team hours each week while delivering personalised experiences to every prospect.',
+      'We conceptualise and execute brand shoots with clarity of purpose — from creative direction and production planning to final output that strengthens campaign impact and visual consistency.',
   },
 ];
 
@@ -80,12 +80,12 @@ const PROCESS = [
 ];
 
 // ─── RESULTS STATS ────────────────────────────────────────────────────────────
-const STATS = [
-  { value: '50+',  label: 'Brands Scaled' },
-  { value: '340%', label: 'Average ROI' },
-  { value: '200+', label: 'Campaigns Run' },
-  { value: '6+',   label: 'Years of Expertise' },
-];
+// const STATS = [
+//   { value: '50+',  label: 'Brands Scaled' },
+//   { value: '340%', label: 'Average ROI' },
+//   { value: '200+', label: 'Campaigns Run' },
+//   { value: '6+',   label: 'Years of Expertise' },
+// ];
 
 interface ServicesPageProps {
   onNavigate?: (page: string) => void;
@@ -99,6 +99,8 @@ export default function ServicesPage({ onNavigate }: ServicesPageProps) {
 
       {/* ── Hero ─────────────────────────────────────────────────── */}
       <section className="relative min-h-[70vh] bg-[#D91E36] flex flex-col overflow-hidden">
+        <div className="absolute right-8 bottom-14 text-white/[0.045] text-[16rem] font-black font-serif leading-none select-none pointer-events-none">AID</div>
+
         {/* diagonal slice */}
         <div
           className="absolute bottom-0 left-0 right-0 h-24 bg-[#E8E4D9] z-10 pointer-events-none" 
@@ -136,7 +138,7 @@ export default function ServicesPage({ onNavigate }: ServicesPageProps) {
                 that drive measurable growth and lasting brand impact.
               </p>
               {/* inline stats */}
-              <div className="grid grid-cols-2 gap-4">
+              {/* <div className="grid grid-cols-2 gap-4">
                 {STATS.map((s, i) => (
                   <motion.div
                     key={i}
@@ -149,7 +151,7 @@ export default function ServicesPage({ onNavigate }: ServicesPageProps) {
                     <p className="text-white/50 text-xs mt-0.5 tracking-wide">{s.label}</p>
                   </motion.div>
                 ))}
-              </div>
+              </div> */}
             </motion.div>
           </div>
         </div>
@@ -320,7 +322,7 @@ export default function ServicesPage({ onNavigate }: ServicesPageProps) {
                 <span className="italic font-light text-[#D91E36]">measure and feel.</span>
               </h2>
               <p className="text-[#8B1E32]/60 leading-relaxed mb-8">
-                We're not a typical agency. Every decision we make is anchored in data, every creative move is intentional, and every campaign is built to grow with your business — not just look good in a deck.
+                We operate with clarity and accountability. Every strategy is tied to a defined objective, every creative decision serves a purpose, and every campaign is built to support measurable business growth — not just presentation value.
               </p>
               <button
                 onClick={() => onNavigate?.('contact')}
@@ -334,10 +336,10 @@ export default function ServicesPage({ onNavigate }: ServicesPageProps) {
             {/* Feature grid */}
             <div className="grid grid-cols-2 gap-4">
               {[
-                {  title: 'Goal-First', desc: 'Every tactic ties back to a concrete business objective.' },
-                {  title: 'Data-Led',   desc: 'Decisions driven by performance data, not guesswork.' },
-                {  title: 'Fast & Lean', desc: 'No bloat. Dedicated teams that move quickly and efficiently.' },
-                {  title: 'Transparent', desc: 'Full reporting access — no smoke, no mirrors, no surprises.' },
+                {  title: 'Goal-Focused', desc: 'Every initiative aligns with a clear business objective and defined outcome.' },
+                {  title: 'Data-Led',   desc: 'Decisions are guided by performance insights and measurable indicators.' },
+                {  title: 'Agile Execution', desc: 'Lean teams that move with focus, discipline and speed.' },
+                {  title: 'Transparent', desc: 'Open communication, clear reporting and shared accountability at every stage.' },
               ].map((f, i) => (
                 <motion.div
                   key={i}

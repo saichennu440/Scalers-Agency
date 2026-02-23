@@ -6,10 +6,10 @@ interface AboutProps {
 }
 
 const highlights = [
-  'Certified growth marketing specialists',
-  'Proven frameworks across 12 industries',
-  'Dedicated account team per client',
-  'Monthly performance reviews & strategy pivots',
+'Certified marketing and strategy professionals',
+'Proven frameworks across multiple industries',
+'Dedicated account leadership for every client',
+'Structured monthly performance reviews',
 ];
 
 export default function About({ onNavigate }: AboutProps) {
@@ -51,7 +51,8 @@ export default function About({ onNavigate }: AboutProps) {
             </h2>
 
             <p className="text-[#8B1E32]/60 text-sm leading-relaxed mb-4">
-              Scalers is a full-service business growth agency specializing in helping ambitious companies break through plateaus and scale to their next level. We combine strategic thinking with creative execution to deliver measurable outcomes.
+              From growing brands to established enterprises, our team works as an extension of yours. Every initiative is guided by planning, accountability and measurable outcomes.
+
             </p>
             <p className="text-[#8B1E32]/60 text-sm leading-relaxed mb-8">
               From startups to established enterprises, our team of specialists works as an extension of your team — fully invested in your success and accountable to real results.

@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 
 export default function ClientsMarquee() {
     const clients = [
-        { name: 'Honeyharvest', logo: './HH_logo.png' },
+        { name: 'Honeyharvest', logo: './HH_logo_png.png' },
         { name: 'Aranya', logo: './Aranya_logo_png.png' },
         { name: 'AromaSpa', logo: './Aroma_Spa_logo_png.png' },
         { name: 'Avis', logo: './Avis_logo_png.png' },

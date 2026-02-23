@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, Mail, Phone, MapPin } from 'lucide-react';
+import { ArrowRight, Mail, Phone, MapPin, Target } from 'lucide-react';
+import { label } from 'framer-motion/client';
 
 /* ─── Native replacements for shadcn Input / Textarea / Button ─── */
 function Input({ className = '', ...props }: React.InputHTMLAttributes<HTMLInputElement>) {
@@ -43,11 +44,9 @@ const SERVICES = [
 ];
 
 const SOCIALS = [
-  { label: 'IG', href: '#' },
-  { label: 'X',  href: '#' },
-  { label: 'TT', href: '#' },
-  { label: 'YT', href: '#' },
-  { label: 'FB', href: '#' },
+  { label: 'IG', target: '_blank', href: 'https://www.instagram.com/scalersbusinessagency/' },
+  {label : 'LI', target: '_blank', href: 'https://www.linkedin.com/company/scalers-agency-business/posts/?feedView=all' },
+  { label: 'FB', target: '_blank', href: 'https://www.facebook.com/p/Scalers-business-agency-61563946187497/' },
 ];
 
 interface FormData {
@@ -57,34 +56,99 @@ interface FormData {
   phone: string;
   service: string;
   message: string;
+  // honeypot field (will remain empty for humans)
+  _gotcha?: string;
 }
 
 interface ContactPageProps {
   onNavigate?: (page: string) => void;
 }
 
+const FORMSPREE_ENDPOINT = 'https://formspree.io/f/xkovpjlj';
+
 export default function ContactPage({ onNavigate }: ContactPageProps) {
   const [formData, setFormData] = useState<FormData>({
     firstName: '', lastName: '', email: '',
-    phone: '', service: '', message: '',
+    phone: '', service: '', message: '', _gotcha: ''
   });
+
+  const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitted(true);
+  const set = (field: keyof FormData) => (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | string
+  ) => {
+    const value = typeof e === 'string' ? e : e.target.value;
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const set = (field: keyof FormData) => (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => setFormData(prev => ({ ...prev, [field]: e.target.value }));
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (status === 'sending') return;
+
+    // simple client-side validation
+    if (!formData.email) {
+      setErrorMsg('Please enter your email.');
+      setStatus('error');
+      return;
+    }
+    // If honeypot filled, likely bot — skip submission quietly
+    if (formData._gotcha && formData._gotcha.trim().length > 0) {
+      console.warn('Honeypot triggered — skipping send.');
+      return;
+    }
+
+    setStatus('sending');
+    setErrorMsg(null);
+
+    try {
+      // Formspree supports JSON submissions when Accept: application/json is sent
+      const payload = {
+        name: `${formData.firstName || ''} ${formData.lastName || ''}`.trim(),
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        _replyto: formData.email,
+        phone: formData.phone,
+        service: formData.service,
+        message: formData.message,
+        _subject: 'New contact from website',
+      };
+
+      const res = await fetch(FORMSPREE_ENDPOINT, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      // Some Formspree endpoints return JSON with errors array on validation failure
+      const json = await res.json().catch(() => ({}));
+
+      if (res.ok) {
+        setStatus('success');
+        setSubmitted(true);
+        // clear form data (optional)
+        setFormData({ firstName: '', lastName: '', email: '', phone: '', service: '', message: '', _gotcha: '' });
+      } else {
+        // show any errors returned by Formspree
+        const serverMsg = json?.error || (json?.errors && json.errors.map((x: any) => x.message).join(', ')) || 'Failed to send message';
+        setErrorMsg(serverMsg);
+        setStatus('error');
+      }
+    } catch (err: any) {
+      setErrorMsg(err?.message || 'Network error');
+      setStatus('error');
+    }
+  };
 
   return (
     <div className="bg-[#E8E4D9] min-h-screen">
-
       {/* ── Hero ─────────────────────────────────────────────────── */}
       <section className="relative min-h-[50vh] bg-[#D91E36] flex flex-col overflow-hidden">
-        {/* noise texture */}
         <div
           className="absolute inset-0 opacity-[0.035] pointer-events-none"
           style={{
@@ -92,17 +156,13 @@ export default function ContactPage({ onNavigate }: ContactPageProps) {
             backgroundSize: '180px',
           }}
         />
-        {/* large background word */}
         <div className="absolute right-4 bottom-10 text-white/[0.045] text-[12rem] md:text-[18rem] font-black font-serif leading-none select-none pointer-events-none">
           HI
         </div>
-
-        {/* diagonal slice */}
         <div
           className="absolute bottom-0 left-0 right-0 h-16 bg-[#E8E4D9] z-10"
           style={{ clipPath: 'polygon(0 100%, 100% 0, 100% 100%)' }}
         />
-
         <div className="flex-1 flex items-end pb-24 px-6 md:px-12 max-w-7xl mx-auto w-full pt-36 relative z-[1]">
           <div className="grid md:grid-cols-2 gap-12 items-end w-full">
             <motion.h1
@@ -130,11 +190,8 @@ export default function ContactPage({ onNavigate }: ContactPageProps) {
       {/* ── Contact Content ───────────────────────────────────────── */}
       <section className="py-20 md:py-28 px-6 md:px-12">
         <div className="max-w-7xl mx-auto grid lg:grid-cols-5 gap-16">
-
           {/* ── Left: Info ───────────────────────────────────────── */}
           <div className="lg:col-span-2 space-y-12">
-
-            {/* Contact details */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -150,7 +207,7 @@ export default function ContactPage({ onNavigate }: ContactPageProps) {
                     label: 'Email',
                     content: (
                       <a href="mailto:hello@scalers.com" className="text-[#8B1E32] hover:text-[#D91E36] transition-colors font-medium">
-                        hello@scalers.com
+                        scalersbusinessagency@gmail.com
                       </a>
                     ),
                   },
@@ -158,8 +215,8 @@ export default function ContactPage({ onNavigate }: ContactPageProps) {
                     icon: Phone,
                     label: 'Phone',
                     content: (
-                      <a href="tel:+1234567890" className="text-[#8B1E32] hover:text-[#D91E36] transition-colors font-medium">
-                        +1 (234) 567-890
+                      <a href="tel:+916300692299" className="text-[#8B1E32] hover:text-[#D91E36] transition-colors font-medium">
+                        +91 63006 92299
                       </a>
                     ),
                   },
@@ -168,7 +225,7 @@ export default function ContactPage({ onNavigate }: ContactPageProps) {
                     label: 'Office',
                     content: (
                       <p className="text-[#8B1E32] font-medium">
-                        123 Design Street<br />New York, NY 10001
+                        ICP 800 Jubilee <br />Jubilee Hills, Hyderabad, Telangana 500033
                       </p>
                     ),
                   },
@@ -188,7 +245,6 @@ export default function ContactPage({ onNavigate }: ContactPageProps) {
 
             <div className="border-t border-[#D91E36]/15" />
 
-            {/* Socials */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -201,6 +257,7 @@ export default function ContactPage({ onNavigate }: ContactPageProps) {
                   <a
                     key={s.label}
                     href={s.href}
+                    target={s.target}
                     className="w-10 h-10 border border-[#D91E36]/30 rounded-full flex items-center justify-center text-[#D91E36] text-xs font-semibold hover:bg-[#D91E36] hover:text-white hover:border-[#D91E36] transition-all duration-200"
                   >
                     {s.label}
@@ -209,7 +266,6 @@ export default function ContactPage({ onNavigate }: ContactPageProps) {
               </div>
             </motion.div>
 
-            {/* Quote box */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -243,7 +299,7 @@ export default function ContactPage({ onNavigate }: ContactPageProps) {
                 <h3 className="text-3xl font-serif text-[#D91E36] mb-4">Message sent!</h3>
                 <p className="text-[#8B1E32]/70">We'll be in touch within 24 hours.</p>
                 <button
-                  onClick={() => { setSubmitted(false); setFormData({ firstName:'', lastName:'', email:'', phone:'', service:'', message:'' }); }}
+                  onClick={() => { setSubmitted(false); setFormData({ firstName:'', lastName:'', email:'', phone:'', service:'', message:'', _gotcha: '' }); }}
                   className="mt-8 text-[#D91E36] text-sm underline hover:text-[#B01830] transition-colors"
                 >
                   Send another message
@@ -253,7 +309,17 @@ export default function ContactPage({ onNavigate }: ContactPageProps) {
               <>
                 <h2 className="text-2xl font-serif text-[#8B1E32] mb-8">Tell us about your project</h2>
 
-                <form onSubmit={handleSubmit} className="space-y-6">
+                <form onSubmit={handleSubmit} className="space-y-6" noValidate>
+                  {/* Honeypot - hidden field to trap bots */}
+                  <div style={{ display: 'none' }}>
+                    <label>Don’t fill this out if you're human</label>
+                    <input
+                      name="_gotcha"
+                      value={formData._gotcha}
+                      onChange={e => setFormData(prev => ({ ...prev, _gotcha: e.target.value }))}
+                      autoComplete="off"
+                    />
+                  </div>
 
                   {/* Name row */}
                   <div className="grid md:grid-cols-2 gap-4">
@@ -263,6 +329,7 @@ export default function ContactPage({ onNavigate }: ContactPageProps) {
                         value={formData.firstName}
                         onChange={set('firstName')}
                         placeholder="Alex"
+                        name="firstName"
                       />
                     </div>
                     <div>
@@ -271,6 +338,7 @@ export default function ContactPage({ onNavigate }: ContactPageProps) {
                         value={formData.lastName}
                         onChange={set('lastName')}
                         placeholder="Mercer"
+                        name="lastName"
                       />
                     </div>
                   </div>
@@ -287,6 +355,7 @@ export default function ContactPage({ onNavigate }: ContactPageProps) {
                         value={formData.email}
                         onChange={set('email')}
                         placeholder="hello@yourbrand.com"
+                        name="email"
                       />
                     </div>
                     <div>
@@ -296,6 +365,7 @@ export default function ContactPage({ onNavigate }: ContactPageProps) {
                         value={formData.phone}
                         onChange={set('phone')}
                         placeholder="+1 (234) 567-890"
+                        name="phone"
                       />
                     </div>
                   </div>
@@ -332,6 +402,7 @@ export default function ContactPage({ onNavigate }: ContactPageProps) {
                       rows={5}
                       placeholder="Tell us about your project, goals, and timeline..."
                       className="min-h-[130px]"
+                      name="message"
                     />
                   </div>
 
@@ -339,10 +410,21 @@ export default function ContactPage({ onNavigate }: ContactPageProps) {
                   <Button
                     type="submit"
                     className="w-full bg-[#D91E36] hover:bg-[#B01830] text-white rounded-full py-4 text-base gap-3 group shadow-lg shadow-[#D91E36]/15 hover:shadow-xl hover:shadow-[#D91E36]/25 hover:-translate-y-0.5"
+                    aria-disabled={status === 'sending'}
+                    disabled={status === 'sending'}
                   >
-                    Send Message
+                    {status === 'sending' ? 'Sending...' : 'Send Message'}
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </Button>
+
+                  <div className="mt-2 text-center min-h-[20px]">
+                    {status === 'success' && (
+                      <p className="text-green-600 text-sm">Thanks — your message has been sent. We’ll reply within 24 hours.</p>
+                    )}
+                    {status === 'error' && (
+                      <p className="text-red-600 text-sm">{errorMsg || 'Something went wrong. Please try again.'}</p>
+                    )}
+                  </div>
 
                   <p className="text-center text-[#8B1E32]/35 text-xs">
                     We respond to every enquiry within 24 hours.

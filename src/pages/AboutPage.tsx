@@ -8,9 +8,9 @@ interface AboutProps {
 }
 
 const stats = [
-    { value: '150+', label: 'Clients Served' },
-    { value: '8+', label: 'Years of Experience' },
-    { value: '320+', label: 'Campaigns Launched' },
+    { value: '50+', label: 'Clients Served' },
+    { value: '5+', label: 'Years of Experience' },
+    { value: '2500+', label: 'Influencers Colabs' },
     { value: '98%', label: 'Client Satisfaction' },
 ];
 
@@ -38,9 +38,9 @@ const team = [
 ];
 
 const values = [
-    { title: 'Bold Thinking', description: 'We push boundaries and challenge conventions to deliver campaigns that stand out in a crowded market.' },
-    { title: 'Data-Driven', description: 'Every decision is backed by insights and analytics to ensure maximum impact and ROI for our clients.' },
-    { title: 'Transparent Partnership', description: 'We build long-term relationships rooted in honesty, clarity, and shared success.' },
+    { title: 'Bold Thinking', description: 'We challenge assumptions and build ideas that move brands forward.' },
+    { title: 'Data-Driven', description: 'Every decision is backed by insight, performance and measurable impact.' },
+    { title: 'Transparent Partnership', description: 'We work with clarity, consistency and shared accountability.' },
 ];
 
 export default function About({ onNavigate }: AboutProps) {
@@ -48,7 +48,7 @@ export default function About({ onNavigate }: AboutProps) {
         <div className="bg-[#E8E4D9] min-h-screen">
             {/* Hero */}
             <section className="relative min-h-[70vh] bg-[#D91E36] flex flex-col overflow-hidden">
-                
+                <div className="absolute right-4 bottom-10 text-white/[0.045] text-[16rem] font-black font-serif leading-none select-none pointer-events-none">WE</div>
                 <div className="flex-1 flex items-end pb-20 px-6 md:px-12 max-w-7xl mx-auto w-full pt-32">
                     <div className="grid md:grid-cols-2 gap-12 items-end w-full">
                         <motion.h1
@@ -65,10 +65,12 @@ export default function About({ onNavigate }: AboutProps) {
                             transition={{ duration: 0.8, delay: 0.3 }}
                             className="text-white/70 text-lg leading-relaxed md:mb-2"
                         >
-                            SCALERS is a full-service marketing agency dedicated to building powerful brands, crafting compelling stories, and scaling businesses that dare to be different.
+                            Scalers is a strategy-led marketing and branding agency focused on building strong business foundations. We help brands define their position, communicate with clarity and scale with consistency.
                         </motion.p>
                     </div>
+                
                 </div>
+                
                 {/* Diagonal cut */}
                 <div className="absolute bottom-0 left-0 right-0 h-16 bg-[#E8E4D9]" style={{ clipPath: 'polygon(0 100%, 100% 0, 100% 100%)' }} />
             </section>
@@ -121,10 +123,10 @@ export default function About({ onNavigate }: AboutProps) {
                             Built by marketers, for brands that want to scale.
                         </h2>
                         <p className="text-[#8B1E32]/70 leading-relaxed">
-                            Founded with a singular vision — to bridge the gap between creativity and performance — SCALERS has grown from a small team of passionate marketers into a full-service agency trusted by brands across industries.
+                            Scalers was founded with a clear purpose — to bring structure to marketing and clarity to growth. What began as a focused team of strategists has evolved into a full-service agency working across industries with one consistent principle: align creativity with measurable outcomes.
                         </p>
                         <p className="text-[#8B1E32]/70 leading-relaxed">
-                            We believe great marketing isn't just about visibility. It's about connection, conversion, and creating lasting impressions that drive real business results.
+                            We believe marketing should do more than create visibility. It should build connection, drive conversion and strengthen long-term brand value. Every step we take is guided by strategy, accountability and sustained progress.
                         </p>
                         <button
                             onClick={() => { onNavigate('services'); window.scrollTo({ top: 0 }); }}

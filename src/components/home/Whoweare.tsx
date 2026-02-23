@@ -11,7 +11,7 @@ export default function AboutSection() {
                     whileInView={{ scale: 1 }}
                     transition={{ duration: 1.2 }}
                     viewport={{ once: true }}
-                    src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=1920&q=80"
+                    src="./home_office.jpeg"
                     alt="Modern office space"
                     className="w-full h-full object-cover"
                 />
@@ -39,11 +39,9 @@ export default function AboutSection() {
                         className="space-y-6"
                     >
                         <p className="text-lg text-[#8B1E32] leading-relaxed">
-                            This is the space to introduce visitors to the business or brand. Briefly explain who's behind it, what it does and what makes it unique. Share its core values and what this site has to offer.
-                        </p>
+                            Scalers Business Agency is a marketing and branding firm focused on helping businesses grow with clarity and direction. We work closely with founders and teams to understand how their business operates before we design how it communicates.                        </p>
                         <p className="text-lg text-[#8B1E32] leading-relaxed">
-                            This is the space to introduce visitors to the business or brand. Briefly explain who's behind it, what it does and what makes it unique. Share its core values and what this site has to offer.
-                        </p>
+                            Our work connects strategy, branding and execution into one structured approach. Instead of isolated campaigns, we build consistent systems that support long-term growth. Every decision is aligned with business objectives, ensuring marketing feels organised, purposeful and scalable. </p>
                     </motion.div>
                 </div>
             </div>

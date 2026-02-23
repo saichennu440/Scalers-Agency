@@ -33,14 +33,14 @@ export default function Footer({ onNavigate }: FooterProps) {
             </p>
             <div className="flex gap-3">
               {[
-                { Icon: Linkedin, href: '#' },
-                { Icon: Twitter, href: '#' },
-                { Icon: Instagram, href: '#' },
-                { Icon: Facebook, href: '#' },
-              ].map(({ Icon, href }, i) => (
+                { Icon: Linkedin, target:"_blank", href: 'https://www.linkedin.com/company/scalers-agency-business/posts/?feedView=all' },
+                { Icon: Instagram, target:"_blank", href: 'https://www.instagram.com/scalersbusinessagency/' },
+                { Icon: Facebook, target:"_blank", href: 'https://www.facebook.com/p/Scalers-business-agency-61563946187497/' },
+              ].map(({ Icon, href, target }, i) => (
                 <a
                   key={i}
                   href={href}
+                  target={target}
                   className="w-9 h-9 rounded-sm bg-white/10 flex items-center justify-center hover:bg-[#C8102E] transition-colors duration-200"
                 >
                   <Icon size={16} />
@@ -76,15 +76,15 @@ export default function Footer({ onNavigate }: FooterProps) {
             <ul className="space-y-4">
               <li className="flex items-start gap-3">
                 <MapPin size={16} className="text-[#C8102E] mt-0.5 shrink-0" />
-                <span className="text-sm text-gray-400">123 Business Ave, Suite 400<br />New York, NY 10001</span>
+                <span className="text-sm text-gray-400">ICP 800 Jubilee <br/>Plot number 800, Road No. 36, near metro pillar no. C1669, CBI Colony, Jubilee Hills<br /> Hyderabad, Telangana 500033</span>
               </li>
               <li className="flex items-center gap-3">
                 <Phone size={16} className="text-[#C8102E] shrink-0" />
-                <span className="text-sm text-gray-400">+1 (555) 123-4567</span>
+                <span className="text-sm text-gray-400">+91 9876543210</span>
               </li>
               <li className="flex items-center gap-3">
                 <Mail size={16} className="text-[#C8102E] shrink-0" />
-                <span className="text-sm text-gray-400">hello@scalers.agency</span>
+                <span className="text-sm text-gray-400">scalersbusinessagency@gmail.com</span>
               </li>
             </ul>
           </div>
