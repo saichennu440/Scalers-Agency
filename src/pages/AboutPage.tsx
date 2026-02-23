@@ -167,7 +167,7 @@ export default function About({ onNavigate }: AboutProps) {
             </section>
 
             {/* Team */}
-            <section className="py-20 md:py-28 bg-[#8B1E32]">
+            <section className="py-20 md:py-28 bg-[#D91E36]">
                 <div className="max-w-7xl mx-auto px-6 md:px-12">
                     <motion.h2
                         initial={{ opacity: 0, y: 20 }}

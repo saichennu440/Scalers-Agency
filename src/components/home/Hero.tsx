@@ -142,7 +142,7 @@ function sampleText(text: string, W: number, H: number, density: number) {
 }
 
 /* ─── Config ──────────────────────────────────────────────────────── */
-const WORDS   = ['SCALERS', 'SCALE', 'GROW', 'WIN', 'LEAD', 'SCALERS'];
+const WORDS   = ['SCALERS', 'SCALERS', 'SCALE', 'GROW', 'WIN', 'LEAD'];
 const PHASES: Record<string, number> = { forming: 90, hold: 160, dispersing: 60, gap: 30 };
 
 /* ─── Canvas component ────────────────────────────────────────────── */

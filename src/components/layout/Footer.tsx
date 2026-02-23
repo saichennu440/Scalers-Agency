@@ -25,7 +25,7 @@ export default function Footer({ onNavigate }: FooterProps) {
             </div>
               <div className="flex flex-col leading-none">
                 <span className="text-xl font-bold text-white tracking-widest">SCALERS</span>
-                <span className="text-[9px] tracking-[0.2em] font-light text-red-300">BUSINESS AGENCY</span>
+                <span className="text-[9px] tracking-[0.1em] font-light text-white/60">BUSINESS AGENCY</span>
               </div>
             </button>
             <p className="text-gray-400 text-sm leading-relaxed max-w-sm mb-6">

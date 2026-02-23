@@ -46,17 +46,7 @@ export default function ServicesSection() {
                         What we do
                     </motion.h2>
                     
-                    <motion.a
-                        href="#services"
-                        initial={{ opacity: 0 }}
-                        whileInView={{ opacity: 1 }}
-                        transition={{ duration: 0.6, delay: 0.2 }}
-                        viewport={{ once: true }}
-                        className="flex items-center gap-2 text-[#8B1E32] hover:text-[#D91E36] transition-colors group"
-                    >
-                        <span>Read more</span>
-                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                    </motion.a>
+                    
                 </div>
 
                 {/* Services List */}
@@ -90,6 +80,12 @@ export default function ServicesSection() {
                         </motion.div>
                     ))}
                     <div className="border-t border-[#D91E36]/20" />
+                </div>
+                <div className="flex justify-end mt-8">
+                    <button className="flex items-center gap-2 text-[#D91E36] font-semibold hover:gap-3 transition-all duration-300">
+                        View all services
+                        <ArrowRight size={18} />
+                    </button>
                 </div>
             </div>
         </section>

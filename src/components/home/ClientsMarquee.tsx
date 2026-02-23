@@ -4,13 +4,22 @@ import { motion } from 'framer-motion';
 export default function ClientsMarquee() {
     const clients = [
         { name: 'Honeyharvest', logo: './HH_logo.png' },
-        { name: 'Slack', logo: './HH_logo.png' },
-        { name: 'Spotify', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/84/Spotify_icon.svg/200px-Spotify_icon.svg.png' },
-        { name: 'Airbnb', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/Airbnb_Logo_B%C3%A9lo.svg/200px-Airbnb_Logo_B%C3%A9lo.svg.png' },
-        { name: 'Pinterest', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Pinterest-logo.png/200px-Pinterest-logo.png' },
-        { name: 'Discord', logo: './HH_logo.png' },
-        { name: 'Figma', logo: './HH_logo.png' },
-        { name: 'Notion', logo: './HH_logo.png' },
+        { name: 'Aranya', logo: './Aranya_logo_png.png' },
+        { name: 'AromaSpa', logo: './Aroma_Spa_logo_png.png' },
+        { name: 'Avis', logo: './Avis_logo_png.png' },
+        { name: 'Bahar Cafe', logo: './Bahar_Cafe_logo_png.png' },
+        { name: 'Bellwether', logo: './Bellwether_logo_png.png' },
+        { name: 'BIA', logo: './BIA_logo_png.png' },
+        { name: 'Coco Tang', logo: './coco_Tang_logo_png.png' },
+        { name: 'Colors', logo: './Colors_logo_png.png' },
+        { name: 'DPS', logo: './DPS_logo_png.png' },
+        { name: 'HTGS', logo: './HTGS_logo_png.png' },
+        { name: 'Ideal_Kitchen', logo: './Ideal_Kitchen_logo_png.png' },
+        { name: 'Legacy Reality', logo: './Legacy_Reality_logo_png.png' },
+        { name: 'Ortus', logo: './Ortus_logo_png.png' },
+        { name: 'Vinjee', logo: './Vinjee_logo_png.png' },
+        { name: 'viroha', logo: './viroha_logo_png.png' },
+        { name: 'Westberry', logo: './Westberry_logo_png.png' },
     ];
 
     // Duplicate for seamless loop
@@ -44,12 +53,12 @@ export default function ClientsMarquee() {
                     {duplicatedClients.map((client, index) => (
                         <div 
                             key={`${client.name}-${index}`}
-                            className="flex-shrink-0 opacity-80 hover:opacity-70 transition-opacity duration-300"
+                            className="flex-shrink-0 opacity-80 hover:opacity-80 transition-opacity duration-300"
                         >
                             <img
                                 src={client.logo}
                                 alt={client.name}
-                                className="h-12  w-auto grayscale"
+                                className="h-24  w-auto grayscale hover:grayscale-0 transition-all duration-300"
                             />
                         </div>
                     ))}

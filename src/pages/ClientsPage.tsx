@@ -10,7 +10,6 @@ interface ClientsPageProps {
   initialCategory?: string;
 }
 
-// ── Content type filter options ────────────────────────────────────
 type ContentFilter = 'all' | 'reels' | 'videos' | 'creatives';
 
 const FILTER_OPTIONS: { value: ContentFilter; label: string }[] = [
@@ -22,6 +21,11 @@ const FILTER_OPTIONS: { value: ContentFilter; label: string }[] = [
 
 /* ═══════════════════════════════════════════════════════════
    MOBILE REEL ITEM
+   Fix: blurred-backdrop technique so nothing is cropped.
+   - Background layer: same media, object-cover + heavy blur
+     → fills the frame edge-to-edge with no black bars
+   - Foreground layer: same media, object-contain
+     → entire image / video fully visible, never cut off
 ═══════════════════════════════════════════════════════════ */
 function ReelItem({
   item,
@@ -32,13 +36,17 @@ function ReelItem({
   isActive: boolean;
   onClick: () => void;
 }) {
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const fgVideoRef = useRef<HTMLVideoElement>(null);
+  const bgVideoRef = useRef<HTMLVideoElement>(null);
 
+  // Sync play / pause on both video layers
   useEffect(() => {
-    const el = videoRef.current;
-    if (!el) return;
-    if (isActive) { el.play().catch(() => {}); }
-    else          { el.pause(); }
+    [fgVideoRef, bgVideoRef].forEach(ref => {
+      const el = ref.current;
+      if (!el) return;
+      if (isActive) el.play().catch(() => {});
+      else          el.pause();
+    });
   }, [isActive]);
 
   function getYouTubeId(url: string) {
@@ -46,9 +54,12 @@ function ReelItem({
     return m ? m[1] : null;
   }
 
-  const ytId   = item.content_url ? getYouTubeId(item.content_url) : null;
-  const isVid  = item.content_type === 'reels' || item.content_type === 'videos' || item.content_type === 'video';
-  const isImg  = item.content_type === 'creatives' || item.content_type === 'image';
+  const ytId  = item.content_url ? getYouTubeId(item.content_url) : null;
+  const isVid = item.content_type === 'reels' || item.content_type === 'videos' || item.content_type === 'video';
+  const isImg = item.content_type === 'creatives' || item.content_type === 'image';
+
+  // Thumbnail URL for YouTube
+  const ytThumb = ytId ? `https://img.youtube.com/vi/${ytId}/maxresdefault.jpg` : null;
 
   return (
     <div
@@ -56,51 +67,117 @@ function ReelItem({
       style={{ height: '100svh' }}
       onClick={onClick}
     >
+      {/* ─────────────────────────────────────────────────────────
+          LAYER 1 — Blurred background (covers the whole frame)
+          Uses object-cover + blur so there are zero black bars.
+          aria-hidden because it's purely decorative.
+      ───────────────────────────────────────────────────────── */}
       {isImg && item.content_url && (
-        <img src={item.content_url} alt={item.title} className="absolute inset-0 w-full h-full object-cover" />
+        <img
+          src={item.content_url}
+          alt=""
+          aria-hidden
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ filter: 'blur(30px)', transform: 'scale(1.18)', opacity: 0.7 }}
+        />
       )}
+      {isVid && (ytThumb ? (
+        <img
+          src={ytThumb}
+          alt=""
+          aria-hidden
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ filter: 'blur(30px)', transform: 'scale(1.18)', opacity: 0.7 }}
+        />
+      ) : item.content_url ? (
+        <video
+          ref={bgVideoRef}
+          src={item.content_url}
+          loop muted playsInline
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ filter: 'blur(30px)', transform: 'scale(1.18)', opacity: 0.7 }}
+        />
+      ) : null)}
 
-      {isVid && item.content_url && (
-        ytId ? (
-          <img
-            src={`https://img.youtube.com/vi/${ytId}/maxresdefault.jpg`}
-            alt={item.title}
-            className="absolute inset-0 w-full h-full object-cover"
-          />
-        ) : (
-          <video
-            ref={videoRef}
-            src={item.content_url}
-            loop muted playsInline
-            className="absolute inset-0 w-full h-full object-cover"
-          />
-        )
+      {/* Dark scrim so blurred bg doesn't overpower the foreground media */}
+      <div className="absolute inset-0 bg-black/45" />
+
+      {/* ─────────────────────────────────────────────────────────
+          LAYER 2 — Actual media (object-contain = never cropped)
+          Portrait reels naturally fill a 9:16 screen.
+          Landscape videos and tall posters sit centred with the
+          blurred bg elegantly filling the remaining space.
+      ───────────────────────────────────────────────────────── */}
+      {isImg && item.content_url && (
+        <img
+          src={item.content_url}
+          alt={item.title}
+          className="absolute inset-0 w-full h-full object-contain"
+          style={{ zIndex: 1 }}
+        />
       )}
+      {isVid && (ytThumb ? (
+        <img
+          src={ytThumb}
+          alt={item.title}
+          className="absolute inset-0 w-full h-full object-contain"
+          style={{ zIndex: 1 }}
+        />
+      ) : item.content_url ? (
+        <video
+          ref={fgVideoRef}
+          src={item.content_url}
+          loop muted playsInline
+          className="absolute inset-0 w-full h-full object-contain"
+          style={{ zIndex: 1 }}
+        />
+      ) : null)}
 
-      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-black/25 pointer-events-none" />
+      {/* ─────────────────────────────────────────────────────────
+          LAYER 3 — Gradient overlay for text readability
+      ───────────────────────────────────────────────────────── */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          zIndex: 2,
+          background: 'linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.0) 42%, rgba(0,0,0,0.30) 100%)',
+        }}
+      />
 
+      {/* ── Play button (video types only) ── */}
       {isVid && (
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <div
+          className="absolute inset-0 flex items-center justify-center pointer-events-none"
+          style={{ zIndex: 3 }}
+        >
           <div className="w-[72px] h-[72px] rounded-full bg-white/12 border border-white/25 backdrop-blur-sm flex items-center justify-center">
             <Play size={26} className="text-white ml-1" fill="white" />
           </div>
         </div>
       )}
 
+      {/* ── Featured badge ── */}
       {item.is_featured && (
-        <div className="absolute top-[88px] right-4 px-3 py-1 rounded-full bg-amber-400/90 backdrop-blur-sm text-[10px] font-bold text-black tracking-wide">
+        <div
+          className="absolute top-[88px] right-4 px-3 py-1 rounded-full bg-amber-400/90 backdrop-blur-sm text-[10px] font-bold text-black tracking-wide"
+          style={{ zIndex: 4 }}
+        >
           ★ Featured
         </div>
       )}
 
-      {/* Type badge */}
-      <div className="absolute top-[88px] left-4">
+      {/* ── Type badge ── */}
+      <div className="absolute top-[88px] left-4" style={{ zIndex: 4 }}>
         <span className="px-2.5 py-1 rounded-full bg-black/40 backdrop-blur-sm text-white text-[10px] font-bold capitalize tracking-wide border border-white/15">
           {item.content_type}
         </span>
       </div>
 
-      <div className="absolute bottom-0 left-0 right-0 px-5 pb-10 pt-20 pointer-events-none">
+      {/* ── Bottom info overlay ── */}
+      <div
+        className="absolute bottom-0 left-0 right-0 px-5 pb-10 pt-20 pointer-events-none"
+        style={{ zIndex: 4 }}
+      >
         {item.category && (
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#D91E36]/75 backdrop-blur-sm mb-3">
             <span className="w-1.5 h-1.5 rounded-full bg-white" />
@@ -150,20 +227,17 @@ export default function ClientsPage({ initialCategory = 'all' }: ClientsPageProp
 
   const categories = ['all', ...Array.from(new Set(items.map(i => i.category).filter(Boolean)))];
 
-  /* ── Filter items ── */
   const filtered = items.filter(item => {
     const s = search.toLowerCase();
     const matchSearch = !search
       || item.title?.toLowerCase().includes(s)
       || item.client_name?.toLowerCase().includes(s)
       || item.category?.toLowerCase().includes(s);
-    // match against new types OR legacy types
     const matchType = activeFilter === 'all' || item.content_type === activeFilter;
     const matchCat  = activeCategory === 'all' || item.category === activeCategory;
     return matchSearch && matchType && matchCat;
   });
 
-  /* ── Category-first ordering ── */
   const ordered = (() => {
     if (activeCategory === 'all') {
       return [
@@ -181,7 +255,6 @@ export default function ClientsPage({ initialCategory = 'all' }: ClientsPageProp
     ];
   })();
 
-  /* ── IntersectionObserver for reel active index ── */
   useEffect(() => {
     const container = reelRef.current;
     if (!container) return;
@@ -237,7 +310,12 @@ export default function ClientsPage({ initialCategory = 'all' }: ClientsPageProp
           )}
 
           {!loading && ordered.map((item, i) => (
-            <ReelItem key={item.id} item={item} isActive={i === activeReelIdx} onClick={() => setSelectedItem(item)} />
+            <ReelItem
+              key={item.id}
+              item={item}
+              isActive={i === activeReelIdx}
+              onClick={() => setSelectedItem(item)}
+            />
           ))}
         </div>
 
@@ -343,7 +421,7 @@ export default function ClientsPage({ initialCategory = 'all' }: ClientsPageProp
                         onClick={() => { setActiveCategory(cat); setFilterOpen(false); }}
                         className={`px-4 py-2 rounded-full text-xs font-semibold capitalize border transition-all duration-200 ${
                           activeCategory === cat
-                            ? 'bg-[#8B1E32] border-[#8B1E32] text-white'
+                            ? 'bg-[#D91E36] border-[#8B1E32] text-white'
                             : 'border-white/12 text-white/45 hover:border-white/30 hover:text-white'
                         }`}
                       >
@@ -407,8 +485,6 @@ export default function ClientsPage({ initialCategory = 'all' }: ClientsPageProp
         <div className="sticky top-0 z-30 bg-[#E8E4D9]/95 backdrop-blur-md border-b border-[#D91E36]/10">
           <div className="max-w-7xl mx-auto px-6 md:px-12">
             <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center py-4">
-
-              {/* Search */}
               <div className="relative flex-1 max-w-xs">
                 <Search size={13} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#D91E36]/40" />
                 <input
@@ -423,8 +499,6 @@ export default function ClientsPage({ initialCategory = 'all' }: ClientsPageProp
                   </button>
                 )}
               </div>
-
-              {/* Type filter pills — Reels / Videos / Creatives */}
               <div className="flex items-center gap-1.5 flex-wrap">
                 {FILTER_OPTIONS.map(({ value, label }) => (
                   <button
@@ -440,13 +514,11 @@ export default function ClientsPage({ initialCategory = 'all' }: ClientsPageProp
                   </button>
                 ))}
               </div>
-
               <span className="ml-auto text-[#8B1E32]/35 text-xs font-medium">
                 {ordered.length} result{ordered.length !== 1 ? 's' : ''}
               </span>
             </div>
 
-            {/* Category tabs */}
             {categories.length > 1 && (
               <div className="flex gap-2 pb-3 overflow-x-auto" style={{ scrollbarWidth: 'none' } as React.CSSProperties}>
                 {categories.map(cat => (
@@ -474,7 +546,6 @@ export default function ClientsPage({ initialCategory = 'all' }: ClientsPageProp
 
         {/* Grid */}
         <div className="max-w-7xl mx-auto px-6 md:px-12 py-14">
-
           {loading && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {[...Array(6)].map((_, i) => (
@@ -497,7 +568,6 @@ export default function ClientsPage({ initialCategory = 'all' }: ClientsPageProp
             </div>
           )}
 
-          {/* Category split */}
           {!loading && ordered.length > 0 && activeCategory !== 'all' && (() => {
             const inCat    = ordered.filter(i => i.category === activeCategory);
             const outOfCat = ordered.filter(i => i.category !== activeCategory);
@@ -537,7 +607,6 @@ export default function ClientsPage({ initialCategory = 'all' }: ClientsPageProp
             );
           })()}
 
-          {/* All-categories view */}
           {!loading && ordered.length > 0 && activeCategory === 'all' && (() => {
             const featured = ordered.filter(i => i.is_featured);
             const rest     = ordered.filter(i => !i.is_featured);
