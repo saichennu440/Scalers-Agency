@@ -102,10 +102,27 @@ const handleProjectClick = (project: Project) => {
   return (
     <section id="projects" className="bg-[#E8E4D9] py-20 md:py-32">
       <div className="max-w-7xl mx-auto px-6 md:px-12">
-        {/* Header (unchanged) */}
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-16">
-          {/* ... */}
-        </div>
+           {/* Header */}
+                <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-16">
+                  <motion.h2
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6 }}
+                    viewport={{ once: true }}
+                    className="text-4xl md:text-5xl lg:text-6xl font-serif text-[#D91E36] mb-6 md:mb-0"
+                  >
+                    Selected projects
+                  </motion.h2>
+        
+                  {/* Replace href with your router navigation if needed */}
+                  <a
+                    href="/#clients"
+                    className="flex items-center gap-2 text-[#8B1E32] hover:text-[#D91E36] transition-colors group"
+                  >
+                    <span>See more</span>
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </a>
+                </div>
 
         {PROJECTS.length === 0 ? (
           <p className="text-center text-[#8B1E32] py-12">No projects to display yet.</p>
