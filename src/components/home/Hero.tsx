@@ -114,10 +114,12 @@ class Spark {
 
 /* ─── Sample text → pixel points ─────────────────────────────────── */
 function sampleText(text: string, W: number, H: number, density: number) {
+  if (W <= 0 || H <= 0) return [];
   const off = document.createElement('canvas');
   off.width = W; off.height = H;
   const ctx = off.getContext('2d')!;
   const fs = Math.min((W * 0.82) / (text.length * 0.62), H * 0.52);
+  if (fs <= 0) return [];
   ctx.fillStyle = '#fff';
   ctx.font = `900 ${fs}px Georgia, serif`;
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
@@ -150,8 +152,13 @@ function ParticleCanvas() {
     const ctx    = canvas.getContext('2d')!;
     const s      = S.current;
 
-    const resize  = () => { canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight; rebuild(); };
+    const resize  = () => {
+      canvas.width  = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+      if (canvas.width > 0 && canvas.height > 0) rebuild();
+    };
     const rebuild = () => {
+      if (canvas.width <= 0 || canvas.height <= 0) return;
       const word    = WORDS[s.wi % WORDS.length];
       const density = Math.max(3, Math.floor(canvas.width / 165));
       const pts     = sampleText(word, canvas.width, canvas.height, density);
@@ -231,6 +238,13 @@ function ParticleCanvas() {
 /* ─── Mobile Hero ─────────────────────────────────────────────────── */
 const MOBILE_WORDS = ['SCALERS', 'SCALE', 'GROW', 'WIN', 'LEAD'];
 const MOBILE_SUBS  = ['We are', 'We help you', 'We help you', 'We help you', 'We help you'];
+const MOBILE_DESCS = [
+  'Your digital growth partner — reels, creatives, and strategy built to convert.',
+  'We take your brand further with content that cuts through the noise.',
+  'Explosive audience growth through data-driven campaigns and bold creatives.',
+  'Dominate your niche with scroll-stopping content that turns views into revenue.',
+  'Stay ahead of the competition with a team that lives and breathes digital.',
+];
 
 function MobileHero({ onNavigate }: HeroProps) {
   const [wordIdx,  setWordIdx]  = useState(0);
@@ -271,6 +285,7 @@ function MobileHero({ onNavigate }: HeroProps) {
 
   const word = MOBILE_WORDS[wordIdx];
   const sub  = MOBILE_SUBS[wordIdx];
+  const desc = MOBILE_DESCS[wordIdx];
 
   return (
     <div
@@ -401,7 +416,7 @@ function MobileHero({ onNavigate }: HeroProps) {
             transition={{ duration: 0.4, delay: 0.2 }}
             className="text-[#E8E4D9]/40 text-sm leading-relaxed max-w-[280px]"
           >
-            Real results for real businesses — reels, creatives, and strategy that converts.
+            {desc}
           </motion.p>
         </AnimatePresence>
 
