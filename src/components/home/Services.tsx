@@ -32,7 +32,7 @@ export default function ServicesSection() {
     ];
 
     return (
-        <section id="services" className="bg-[#E8E4D9] py-20 md:py-32">
+        <section id="services" className="bg-[#ffffff] py-20 md:py-32">
             <div className="max-w-7xl mx-auto px-6 md:px-12">
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-16">

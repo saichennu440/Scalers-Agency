@@ -253,6 +253,7 @@ function MobileHero({ onNavigate }: HeroProps) {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const rippleId    = useRef(0);
   const DURATION    = 3200; // ms per word
+  const INIT_DELAY  = 2800; // ms wait before first auto-advance (splash screen)
 
   const advance = useCallback((x?: number, y?: number) => {
     if (x !== undefined && y !== undefined) {
@@ -264,16 +265,26 @@ function MobileHero({ onNavigate }: HeroProps) {
     setProgress(0);
   }, []);
 
-  // Auto-advance timer
+  // Auto-advance timer — waits for splash screen before starting
   useEffect(() => {
     setProgress(0);
-    intervalRef.current = setInterval(() => {
-      setProgress(p => {
-        if (p >= 100) { advance(); return 0; }
-        return p + (100 / (DURATION / 50));
-      });
-    }, 50);
-    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+    let started = false;
+    // On first word, wait for splash; subsequent words start immediately
+    const delay = wordIdx === 0 ? INIT_DELAY : 0;
+    const startTimer = () => {
+      started = true;
+      intervalRef.current = setInterval(() => {
+        setProgress(p => {
+          if (p >= 100) { advance(); return 0; }
+          return p + (100 / (DURATION / 50));
+        });
+      }, 50);
+    };
+    const timeout = setTimeout(startTimer, delay);
+    return () => {
+      clearTimeout(timeout);
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
   }, [wordIdx]);
 
   const handleTap = (e: React.TouchEvent | React.MouseEvent) => {
@@ -347,8 +358,8 @@ function MobileHero({ onNavigate }: HeroProps) {
           transition={{ duration: 0.7, delay: 0.2 }}
           className="flex items-center gap-2"
         >
-          <span className="w-1.5 h-1.5 rounded-full bg-[#D91E36] animate-pulse" />
-          <span className="text-[#E8E4D9]/30 text-[9px] tracking-[0.35em] uppercase font-semibold">Digital Growth Agency</span>
+          {/* <span className="w-1.5 h-1.5 rounded-full bg-[#D91E36] animate-pulse" />
+          <span className="text-[#E8E4D9]/30 text-[9px] tracking-[0.35em] uppercase font-semibold">Digital Growth Agency</span> */}
         </motion.div>
         <motion.div
           initial={{ opacity: 0 }}
@@ -388,7 +399,7 @@ function MobileHero({ onNavigate }: HeroProps) {
               transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
               className="font-serif font-black text-white leading-none"
               style={{
-                fontSize: word.length <= 4 ? '22vw' : word.length <= 6 ? '18vw' : '13vw',
+                fontSize: word.length <= 3 ? '26vw' : word.length <= 4 ? '22vw' : word.length <= 5 ? '19vw' : '15vw',
                 letterSpacing: '-0.02em',
               }}
             >
