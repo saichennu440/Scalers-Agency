@@ -178,11 +178,16 @@ function ParticleCanvas() {
     };
     const onLeave = () => { s.mouse.x = null; s.mouse.y = null; };
 
-    // Click: explosive burst at cursor position
+    // Click: explosive burst at cursor position + advance to next word
     const onClick = (e: MouseEvent) => {
       const r = canvas.getBoundingClientRect();
       const cx = e.clientX - r.left, cy = e.clientY - r.top;
       for (let i = 0; i < 30; i++) s.sparks.push(new Spark(cx, cy, true));
+      
+      // Advance to next word on click
+      s.phase = 'dispersing';
+      s.timer = 0;
+      s.wi++;
     };
 
     canvas.addEventListener('mousemove', onMove);

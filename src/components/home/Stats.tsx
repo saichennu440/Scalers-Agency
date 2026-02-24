@@ -19,32 +19,32 @@ const PROJECTS: Project[] = [
     title: 'Brand Campaign 2024',
     category: 'Branding',
     date: '2024',
-    image_url: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80',
-    video_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', // replace with your URL
+    image_url: './selected_projects/brand_campign.png',
+    video_url: 'https://youtube.com/shorts/yfXkZ-3NbBI?si=tuIWuaWWp7zKEuNY', // replace with your URL
   },
   {
     id: '2',
-    title: 'Product Launch Film',
+    title: 'Store Launch Film',
     category: 'Video Production',
-    date: '2024',
-    image_url: 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=800&q=80',
-    video_url: 'https://vimeo.com/76979871', // replace with your URL
+    date: '2025',
+    image_url: './selected_projects/product_launch.png',
+    video_url: 'https://www.youtube.com/watch?v=emjaz9wsj04', // replace with your URL
   },
-  {
-    id: '3',
-    title: 'Social Media Series',
-    category: 'Content',
-    date: '2023',
-    image_url: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=800&q=80',
-    // no video — card will not be clickable
-  },
+{
+  id: '3',
+  title: 'Social Media Creatives',
+  category: 'Content',
+  date: '2023',
+  image_url: './selected_projects/creative.jpg',
+  redirect_url: 'https://www.instagram.com/honeyharvestby7/', 
+},
   {
     id: '4',
     title: 'Event Highlight Reel',
     category: 'Events',
     date: '2023',
-    image_url: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&q=80',
-    video_file_url: 'https://www.w3schools.com/html/mov_bbb.mp4', // replace with your MP4
+    image_url: './selected_projects/event_shoot.jpeg',
+    video_file_url: 'https://www.instagram.com/reel/DUzY0yRD8UC/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==', // replace with your MP4
   },
 ];
 // ─────────────────────────────────────────────────────────────────────────────
@@ -64,36 +64,49 @@ function hasVideo(project: Project) {
   return !!(project.video_url || project.video_file_url);
 }
 
+// (Keep your imports / types above unchanged)
+
 export default function ProjectsSection() {
   const [selectedVideo, setSelectedVideo] = useState<Project | null>(null);
+
+const handleProjectClick = (project: Project) => {
+  // Project 2 → Open modal
+  if (project.id === '2' && hasVideo(project)) {
+    setSelectedVideo(project);
+    return;
+  }
+
+  // Project 3 → Redirect to given link
+  if (project.id === '3' && (project as any).redirect_url) {
+    window.open((project as any).redirect_url, '_blank', 'noopener,noreferrer');
+    return;
+  }
+
+  // Projects 1 & 4 → Open video in new tab
+  if (hasVideo(project)) {
+    const url = project.video_url ?? project.video_file_url;
+    if (url) {
+      window.open(url, '_blank', 'noopener,noreferrer');
+      return;
+    }
+  }
+};
+
+  const handleKeyDown = (e: React.KeyboardEvent, project: Project) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleProjectClick(project);
+    }
+  };
 
   return (
     <section id="projects" className="bg-[#E8E4D9] py-20 md:py-32">
       <div className="max-w-7xl mx-auto px-6 md:px-12">
-
-        {/* Header */}
+        {/* Header (unchanged) */}
         <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-16">
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-            className="text-4xl md:text-5xl lg:text-6xl font-serif text-[#D91E36] mb-6 md:mb-0"
-          >
-            Selected projects
-          </motion.h2>
-
-          {/* Replace href with your router navigation if needed */}
-          <a
-            href="/#clients"
-            className="flex items-center gap-2 text-[#8B1E32] hover:text-[#D91E36] transition-colors group"
-          >
-            <span>See more</span>
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-          </a>
+          {/* ... */}
         </div>
 
-        {/* Grid */}
         {PROJECTS.length === 0 ? (
           <p className="text-center text-[#8B1E32] py-12">No projects to display yet.</p>
         ) : (
@@ -105,8 +118,21 @@ export default function ProjectsSection() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
                 viewport={{ once: true }}
-                className={`group block ${hasVideo(project) ? 'cursor-pointer' : 'cursor-default'}`}
-                onClick={() => hasVideo(project) && setSelectedVideo(project)}
+                // make interactive if it has a video or file
+                className={`group block ${
+  project.id === '1' || project.id === '2' || project.id === '3' || project.id === '4'
+    ? 'cursor-pointer'
+    : 'cursor-default'
+}`}
+                onClick={() => handleProjectClick(project)}
+                onKeyDown={(e) => handleKeyDown(e, project)}
+                role={hasVideo(project) ? 'link' : undefined}
+                tabIndex={hasVideo(project) ? 0 : undefined}
+                aria-label={
+                  hasVideo(project)
+                    ? `Open ${project.title} ${project.id === '2' ? 'modal' : 'in new tab'}`
+                    : project.title
+                }
               >
                 <div className="relative overflow-hidden rounded-lg aspect-[4/3]">
                   <img
@@ -138,16 +164,13 @@ export default function ProjectsSection() {
         )}
       </div>
 
-      {/* Video Modal */}
+      {/* Video Modal (unchanged) */}
       {selectedVideo && (
         <div
           className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
           onClick={() => setSelectedVideo(null)}
         >
-          <div
-            className="relative w-full max-w-4xl aspect-video"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className="relative w-full max-w-4xl aspect-video" onClick={(e) => e.stopPropagation()}>
             <button
               onClick={() => setSelectedVideo(null)}
               className="absolute -top-12 right-0 text-white hover:text-gray-300 transition-colors"
@@ -156,13 +179,7 @@ export default function ProjectsSection() {
             </button>
 
             {selectedVideo.video_file_url ? (
-              <video
-                src={selectedVideo.video_file_url}
-                controls
-                autoPlay
-                playsInline
-                className="w-full h-full rounded-lg"
-              />
+              <video src={selectedVideo.video_file_url} controls autoPlay playsInline className="w-full h-full rounded-lg" />
             ) : (
               <iframe
                 src={getEmbedUrl(selectedVideo.video_url) ?? ''}

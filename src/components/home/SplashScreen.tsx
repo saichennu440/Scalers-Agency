@@ -41,7 +41,7 @@ export default function SplashScreen({ onComplete }: { onComplete: () => void })
               transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
               className="w-20 h-20"
             >
-              <svg viewBox="0 0 40 40" className="w-full h-full" fill="none">
+              <svg viewBox="0 0 45 40" className="w-full h-full" fill="none">
                 {/* Back polygon — white at 50% opacity (was red/0.5 on dark, inverted here) */}
                 <motion.polygon
                   points="20,5 35,35 20,25 5,35"
