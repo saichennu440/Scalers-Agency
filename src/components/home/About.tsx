@@ -22,7 +22,7 @@ export default function About({ onNavigate }: AboutProps) {
           <div className="relative">
             <div className="aspect-[4/3] rounded-2xl overflow-hidden">
               <img
-                src="https://images.pexels.com/photos/3184338/pexels-photo-3184338.jpeg?auto=compress&cs=tinysrgb&w=900"
+                src="./aboutpage_team.png"
                 alt="Scalers team at work"
                 className="w-full h-full object-cover"
               />
@@ -31,7 +31,7 @@ export default function About({ onNavigate }: AboutProps) {
             </div>
             {/* stat badge */}
             <div className="absolute -bottom-6 -right-6 bg-[#D91E36] text-white p-6 rounded-2xl hidden lg:block shadow-xl shadow-[#D91E36]/20">
-              <div className="text-4xl font-serif font-light">8+</div>
+              <div className="text-4xl font-serif font-light">5+</div>
               <div className="text-[10px] tracking-[0.2em] uppercase text-red-100 mt-1 font-medium">Years in Business</div>
             </div>
           </div>

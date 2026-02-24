@@ -11,7 +11,7 @@ export default function CTA({ onNavigate }: CTAProps) {
       {/* Background image */}
       <div
         className="absolute inset-0 bg-cover bg-center opacity-8"
-        style={{ backgroundImage: `url('https://images.pexels.com/photos/3182812/pexels-photo-3182812.jpeg?auto=compress&cs=tinysrgb&w=1920')` }}
+        style={{ backgroundImage: `url('./homepage_team.png')` }}
       />
       {/* Gradient overlays */}
       <div className="absolute inset-0 bg-gradient-to-r from-[#C8102E]/15 to-transparent" />

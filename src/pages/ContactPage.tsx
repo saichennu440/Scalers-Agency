@@ -37,9 +37,10 @@ function Button({ className = '', children, ...props }: React.ButtonHTMLAttribut
 const SERVICES = [
   'Influencer Marketing',
   'Content Creation',
-  'Email Campaigns',
+  'Digital Marketing',
   'Social Media',
   'Website Design',
+  'Branding',
   'Other',
 ];
 

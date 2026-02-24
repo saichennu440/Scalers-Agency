@@ -22,7 +22,7 @@ export default function SplashScreen({ onComplete }: { onComplete: () => void })
           className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#D91E36]"
         >
           {/* Vertical grid lines texture */}
-          <div className="absolute inset-0 overflow-hidden opacity-10 pointer-events-none">
+          {/* <div className="absolute inset-0 overflow-hidden opacity-10 pointer-events-none">
             {Array.from({ length: 12 }).map((_, i) => (
               <div
                 key={i}
@@ -30,7 +30,7 @@ export default function SplashScreen({ onComplete }: { onComplete: () => void })
                 style={{ left: `${(i + 1) * (100 / 13)}%` }}
               />
             ))}
-          </div>
+          </div> */}
 
           <div className="relative flex flex-col items-center gap-0">
 

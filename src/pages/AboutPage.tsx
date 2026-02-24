@@ -16,25 +16,26 @@ const stats = [
 
 const team = [
     {
-        name: 'Alexandra Moore',
+        name: 'Ramya Jaddu',
         role: 'Founder & CEO',
         image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80',
     },
     {
-        name: 'James Carter',
-        role: 'Creative Director',
-        image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80',
+        name: 'Arthi Singh',
+        role: 'Social Media Manager',
+        image: './about/Arthi.png',
     },
     {
-        name: 'Sofia Reyes',
-        role: 'Head of Strategy',
-        image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=80',
+        name: 'Karthikeya',
+        role: 'Editor & Content Strategist',
+        image: './about/karthik2.png',
     },
     {
-        name: 'David Kim',
-        role: 'Lead Developer',
-        image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&q=80',
+        name: 'Jagadeshwari',
+        role: 'Graphic Designer',
+        image: './about/jaggu2.png',
     },
+  
 ];
 
 const values = [
@@ -105,7 +106,7 @@ export default function About({ onNavigate }: AboutProps) {
                         className="relative"
                     >
                         <img
-                            src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&q=80"
+                            src="./Aboutpage_2.png"
                             alt="Team at work"
                             className="rounded-2xl w-full object-cover aspect-[4/5]"
                         />
@@ -169,7 +170,7 @@ export default function About({ onNavigate }: AboutProps) {
             </section>
 
             {/* Team */}
-            <section className="py-20 md:py-28 bg-[#D91E36]">
+            <section className="py-20 md:py-28 bg-black">
                 <div className="max-w-7xl mx-auto px-6 md:px-12">
                     <motion.h2
                         initial={{ opacity: 0, y: 20 }}
