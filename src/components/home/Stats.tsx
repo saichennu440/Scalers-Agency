@@ -36,11 +36,11 @@ const PROJECTS: Project[] = [
   category: 'Content',
   date: '2023',
   image_url: './selected_projects/creative.jpg',
-  redirect_url: 'https://www.instagram.com/honeyharvestby7/', 
+  redirect_url: 'https://www.instagram.com/reel/DTKxkHokvhd/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==', 
 },
   {
     id: '4',
-    title: 'Event Highlight Reel',
+    title: 'Podcast Shoots',
     category: 'Events',
     date: '2023',
     image_url: './selected_projects/event_shoot.jpeg',

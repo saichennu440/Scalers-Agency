@@ -76,7 +76,7 @@ export default function ClientsMarquee() {
             via animation-play-state rather than fighting Framer Motion re-renders.
           */}
           <div
-            className="flex items-center gap-16 md:gap-24"
+             className="marquee-track flex items-center gap-16 md:gap-24"
             style={{
               animation: `marquee-scroll ${40 * (clients.length / 17)}s linear infinite`,
               animationPlayState: selected ? 'paused' : 'running',
@@ -115,6 +115,11 @@ export default function ClientsMarquee() {
           from { transform: translateX(0); }
           to   { transform: translateX(-25%); }
         }
+
+        /* Pause marquee when hovered */
+  .marquee-track:hover {
+    animation-play-state: paused !important;
+  }
       `}</style>
 
       {/* ── Logo popup overlay ─────────────────────────────────── */}
