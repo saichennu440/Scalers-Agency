@@ -80,7 +80,7 @@ export default function SplashScreen({ onComplete }: { onComplete: () => void })
                   animate={{ opacity: 1, y: 0, letterSpacing: '0.45em' }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.5, ease: 'easeOut' }}
-                  className="text-white text-2xl font-black tracking-[0.45em]"
+                  className="text-white text-xl font-bold tracking-[0.45em]"
                 >
                   SCALERS
                 </motion.div>
@@ -95,7 +95,7 @@ export default function SplashScreen({ onComplete }: { onComplete: () => void })
                   animate={{ opacity: 0.5 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.5, delay: 0.15 }}
-                  className="text-white text-[15px] tracking-[0.1em] uppercase font-medium"
+                  className="text-white text-[13px] tracking-[0.1em] uppercase font-light"
                 >
                   Business Agency
                 </motion.p>

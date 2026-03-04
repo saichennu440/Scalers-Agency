@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Page } from '../lib/types';
 import { ArrowRight } from 'lucide-react';
+import { a } from 'framer-motion/client';
 
 interface AboutProps {
   onNavigate: (page: Page) => void;
@@ -18,7 +19,8 @@ const team = [
     {
         name: 'Ramya Jaddu',
         role: 'Founder & CEO',
-        image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80',
+        image: './about/ramya.png',
+        
     },
     {
         name: 'Arthi Singh',
