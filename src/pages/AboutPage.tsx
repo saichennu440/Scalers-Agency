@@ -172,7 +172,7 @@ export default function About({ onNavigate }: AboutProps) {
             </section>
 
             {/* Team */}
-            <section className="py-20 md:py-28 bg-black">
+            {/* <section className="py-20 md:py-28 bg-black">
                 <div className="max-w-7xl mx-auto px-6 md:px-12">
                     <motion.h2
                         initial={{ opacity: 0, y: 20 }}
@@ -205,7 +205,7 @@ export default function About({ onNavigate }: AboutProps) {
                         ))}
                     </div>
                 </div>
-            </section>
+            </section> */}
 
             {/* CTA */}
             <section className="py-24 px-6 md:px-12 text-center">
